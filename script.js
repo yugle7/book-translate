@@ -5,184 +5,180 @@ const grid = document.getElementById("resizableGrid");
 let editable = null;
 
 uploadBtn.addEventListener("click", () => {
-  fileInput.click();
+    fileInput.click();
 });
 
 fileInput.addEventListener("change", async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
+    const file = e.target.files[0];
+    if (!file) return;
 
-  const text = await file.text();
-  showEditor(text);
+    const text = await file.text();
+    showEditor(text);
 });
 
 function showEditor(text) {
-  downloadScreen.classList.add("hidden");
-  grid.classList.remove("hidden");
+    downloadScreen.classList.add("hidden");
+    grid.classList.remove("hidden");
 
-  const paragraphs = text.split(/\n+/);
+    const paragraphs = text.split(/\n+/);
 
-  paragraphs.forEach((t) => {
-    const left = document.createElement("p");
-    left.classList.add("left");
-    left.textContent = t.trim();
-    grid.appendChild(left);
+    paragraphs.forEach((t) => {
+        const left = document.createElement("p");
+        left.classList.add("left");
+        left.textContent = t.trim();
+        grid.appendChild(left);
 
-    const gutter = document.createElement("div");
-    grid.appendChild(gutter);
+        const gutter = document.createElement("div");
+        grid.appendChild(gutter);
 
-    const right = document.createElement("p");
-    right.classList.add("right");
-    right.textContent = t.trim();
-    grid.appendChild(right);
-  });
+        const right = document.createElement("p");
+        right.classList.add("right");
+        right.textContent = t.trim();
+        grid.appendChild(right);
+    });
 
-  initEditor();
+    initEditor();
 }
 
 function initEditor() {
-  let activeSplitter = null;
-  let isDragging = false;
-  let startX = 0;
-  let startLeftWidth = 0;
-  let clickTimeout = null;
-  let wasDragging = false;
+    let activeSplitter = null;
+    let isDragging = false;
+    let startX = 0;
+    let startLeftWidth = 0;
+    let clickTimeout = null;
+    let wasDragging = false;
 
-  function makeEditable(cell, clientX, clientY) {
-    if (cell.classList.contains("editable")) {
-      if (clientX != null) {
-        const selection = window.getSelection();
-        const range = document.caretRangeFromPoint(clientX, clientY);
-        if (range) {
-          selection.removeAllRanges();
-          selection.addRange(range);
+    function makeEditable(cell, clientX, clientY) {
+        if (cell.classList.contains("editable")) {
+            if (clientX != null) {
+                const selection = window.getSelection();
+                const range = document.caretRangeFromPoint(clientX, clientY);
+                if (range) {
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                }
+            }
+            return;
         }
-      }
-      return;
+
+        cell.classList.add("editable");
+        cell.contentEditable = true;
+        cell.focus();
+
+        if (clientX != null) {
+            const selection = window.getSelection();
+            const range = document.caretRangeFromPoint(clientX, clientY);
+            if (range) {
+                selection.removeAllRanges();
+                selection.addRange(range);
+            }
+        } else {
+            const range = document.createRange();
+            range.selectNodeContents(cell);
+            range.collapse(false);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
     }
 
-    cell.classList.add("editable");
-    cell.contentEditable = true;
-    cell.focus();
-
-    if (clientX != null) {
-      const selection = window.getSelection();
-      const range = document.caretRangeFromPoint(clientX, clientY);
-      if (range) {
-        selection.removeAllRanges();
-        selection.addRange(range);
-      }
-    } else {
-      const range = document.createRange();
-      range.selectNodeContents(cell);
-      range.collapse(false);
-      const selection = window.getSelection();
-      selection.removeAllRanges();
-      selection.addRange(range);
-    }
-  }
-
-  function handleCellClick(e) {
-    if (isDragging) return;
-    if (e.target.tagName !== "P") return;
-    if (e.target.classList.contains("editable")) return;
-    if (editable) {
-      editable.classList.remove("editable");
-      editable.contentEditable = false;
-      editable.removeEventListener("keydown", editableKeydown);
-    }
-    editable = e.target;
-    editable.addEventListener("keydown", editableKeydown);
-    makeEditable(editable, e.clientX, e.clientY);
-  }
-
-  function handleMouseDown(e) {
-    activeSplitter = e.target;
-    isDragging = true;
-    wasDragging = false;
-    activeSplitter.classList.add("dragging");
-    document.body.style.cursor = "col-resize";
-
-    const leftColRect = grid.querySelector(".left").getBoundingClientRect();
-    startLeftWidth = leftColRect.width;
-    startX = e.clientX;
-
-    e.preventDefault();
-  }
-
-  function handleMouseMove(e) {
-    if (!isDragging) return;
-
-    wasDragging = true;
-    if (clickTimeout) {
-      clearTimeout(clickTimeout);
-      clickTimeout = null;
+    function handleCellClick(e) {
+        if (isDragging) return;
+        if (e.target.tagName !== "P") return;
+        if (e.target.classList.contains("editable")) return;
+        if (editable) {
+            editable.classList.remove("editable");
+            editable.contentEditable = false;
+            editable.removeEventListener("keydown", editableKeydown);
+        }
+        editable = e.target;
+        editable.addEventListener("keydown", editableKeydown);
+        makeEditable(editable, e.clientX, e.clientY);
     }
 
-    const deltaX = e.clientX - startX;
-    let newLeftWidth = startLeftWidth + deltaX;
+    function handleMouseDown(e) {
+        activeSplitter = e.target;
+        isDragging = true;
+        wasDragging = false;
+        activeSplitter.classList.add("dragging");
+        document.body.style.cursor = "col-resize";
 
-    const gridRect = grid.getBoundingClientRect();
-    const minWidth = 150;
-    const maxWidth = gridRect.width - 150;
-    newLeftWidth = Math.min(maxWidth, Math.max(minWidth, newLeftWidth));
+        const leftColRect = grid.querySelector(".left").getBoundingClientRect();
+        startLeftWidth = leftColRect.width;
+        startX = e.clientX;
 
-    grid.style.gridTemplateColumns = `${newLeftWidth}px 5px 1fr`;
-  }
-
-  function handleMouseUp() {
-    if (isDragging && activeSplitter) {
-      isDragging = false;
-      activeSplitter.classList.remove("dragging");
-      document.body.style.cursor = "";
-      activeSplitter = null;
+        e.preventDefault();
     }
-  }
 
-  const gutters = grid.querySelectorAll("div");
-  gutters.forEach((gutter) => {
-    gutter.addEventListener("mousedown", handleMouseDown);
-  });
+    function handleMouseMove(e) {
+        if (!isDragging) return;
 
-  grid.addEventListener("click", handleCellClick);
+        wasDragging = true;
+        if (clickTimeout) {
+            clearTimeout(clickTimeout);
+            clickTimeout = null;
+        }
 
-  document.addEventListener("mousemove", handleMouseMove);
-  document.addEventListener("mouseup", handleMouseUp);
-  document.addEventListener("mouseleave", handleMouseUp);
+        const deltaX = e.clientX - startX;
+        let newLeftWidth = startLeftWidth + deltaX;
+
+        const gridRect = grid.getBoundingClientRect();
+        const minWidth = 150;
+        const maxWidth = gridRect.width - 150;
+        newLeftWidth = Math.min(maxWidth, Math.max(minWidth, newLeftWidth));
+
+        grid.style.gridTemplateColumns = `${newLeftWidth}px 5px 1fr`;
+    }
+
+    function handleMouseUp() {
+        if (isDragging && activeSplitter) {
+            isDragging = false;
+            activeSplitter.classList.remove("dragging");
+            document.body.style.cursor = "";
+            activeSplitter = null;
+        }
+    }
+
+    const gutters = grid.querySelectorAll("div");
+    gutters.forEach((gutter) => {
+        gutter.addEventListener("mousedown", handleMouseDown);
+    });
+
+    grid.addEventListener("click", handleCellClick);
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+    document.addEventListener("mouseleave", handleMouseUp);
 }
 
 const editableKeydown = (e) => {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    document.execCommand("insertLineBreak");
-  }
+    if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        document.execCommand("insertLineBreak");
+    }
 };
 
 const saveBtn = document.getElementById("saveBtn");
 saveBtn.addEventListener("click", () => {
-  const leftCells = grid.querySelectorAll(".left");
-  let text = "";
-  leftCells.forEach((cell) => {
-    text += cell.textContent + "\n\n";
-  });
+    const leftCells = grid.querySelectorAll(".left");
+    let text = "";
+    leftCells.forEach((cell) => {
+        text += cell.textContent + "\n\n";
+    });
 
-  const blob = new Blob([text], { type: "text/plain" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "translation.txt";
-  a.click();
-  URL.revokeObjectURL(url);
+    const blob = new Blob([text], {type: "text/plain"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "translation.txt";
+    a.click();
+    URL.revokeObjectURL(url);
 });
 
 const backBtn = document.getElementById("backBtn");
 backBtn.addEventListener("click", () => {
-  grid.classList.add("hidden");
-  downloadScreen.classList.remove("hidden");
+    grid.classList.add("hidden");
+    downloadScreen.classList.remove("hidden");
 
-  const paragraphs = grid.querySelectorAll("p");
-  paragraphs.forEach((p) => p.remove());
-
-  const gutters = grid.querySelectorAll("div");
-  gutters.forEach((g) => g.remove());
+    Array.from(grid.children).slice(5).forEach((q) => q.remove());
 });
