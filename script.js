@@ -103,9 +103,7 @@ function initEditor() {
     activeSplitter.classList.add("dragging");
     document.body.style.cursor = "col-resize";
 
-    console.log(grid.firstElementChild);
-
-    const leftColRect = grid.firstElementChild.getBoundingClientRect();
+    const leftColRect = grid.getSelector(".left").getBoundingClientRect();
     startLeftWidth = leftColRect.width;
     startX = e.clientX;
 
