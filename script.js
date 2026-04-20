@@ -14,6 +14,8 @@ fileInput.addEventListener("change", async (e) => {
 
     const text = await file.text();
     showEditor(text);
+
+    fileInput.value = "";
 });
 
 function showEditor(text) {
