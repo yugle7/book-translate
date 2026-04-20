@@ -1,3 +1,4 @@
+import base64
 import os
 import db
 import hashlib
@@ -10,17 +11,25 @@ dotenv.load_dotenv()
 
 def handler(event, context):
     params = event["queryStringParameters"]
+    print(event)
 
-    book_id = params["book_id"]
-    en = params["en"]
-    ru = params["ru"]
+    b = params.get("b")
+    i = params.get("i")
+    text = None
 
-    if book_id:
-        if en and ru:
-            res = db.save_book(book_id, en, ru)
+    if event['httpMethod'] == 'POST':
+        body = event.get('body')
+        if event.get('isBase64Encoded'):
+            text = base64.b64decode(body).decode('utf-8')
+
+    if b:
+        if i:
+            res = db.translate_book(b, int(i))
+        elif text:
+            res = db.edit_book(b, text)
         else:
-            res = db.load_book(book_id)
+            res = db.load_book(b)
     else:
-        res = db.translate_book(en)
+        res = db.add_book(text)
 
     return {"statusCode": 200, "body": res}

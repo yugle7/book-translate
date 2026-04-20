@@ -1,13 +1,11 @@
 import ydb
 import ydb.iam
-
+import re
 from time import time
 
 import os
-import json
 
 from utils import translate
-
 
 import dotenv
 
@@ -41,24 +39,39 @@ def execute(yql):
     return pool.retry_operation_sync(wrapper)
 
 
-def load_book(book_id):
-    return execute(f"SELECT ru, en FROM books WHERE book_id={book_id};")
+def add_book(text):
+    b = int(time())
+    texts = re.split(r'\s*\n+\s*', text)
+    texts = [t for t in texts if t]
+    values = ",".join(f'({b}, {i}, "{en}")' for i, en in enumerate(texts))
+    execute(f"INSERT INTO books (b, i, en) VALUES {values};")
+    return b
 
 
-def save_book(book_id, translation):
-    execute(f"DELETE FROM books WHERE book_id={book_id};")
-    values = ",".join(f'({book_id}, "{q['ru']}", "{q['en']}")' for q in translation)
-    execute(f"INSERT INTO books (book_id, ru, en) VALUES {values};")
-
-    return {"ok": True}
+def load_book(b):
+    return execute(f"SELECT ru, en FROM books WHERE b={b} ORDER BY i;")
 
 
-def translate_book(en):
-    book_id = int(time())
+def edit_book(b, text):
+    book = execute(f"SELECT ru, en FROM books WHERE b={b} ORDER BY i;")
+    for i, ru in enumerate(text.split('\n')):
+        book[i]['ru'] = ru
+    execute(f"DELETE FROM books WHERE b={b};")
+    values = ",".join(f'({b}, {i}, "{q['ru']}", "{q['en']}")' for i, q in enumerate(book))
+    execute(f"INSERT INTO books (b, i, ru, en) VALUES {values};")
+    return {}
 
-    ru = translate(en)
 
-    values = ",".join(f'("{en}", "{ru}", {book_id})' for en, ru in zip(en, ru))
-    execute(f"INSERT INTO books (en, ru, id) VALUES {values};")
+def translate_book(b, i):
+    book = execute(f"SELECT ru, en FROM books WHERE b={b} ORDER BY i;")
+    j = i + 1
+    while i and not book[i - 1]['ru']:
+        i -= 1
 
-    return {"ru": ru}
+    i, j = translate(book, i, j)
+    execute(f'DELETE FROM books WHERE b={b} and i >= {i} and i < {j}')
+
+    values = ",".join(f'({b}, {k}, "{book[k]['ru']}", "{book[k]['en']}")' for k in range(i, j))
+    execute(f"INSERT INTO books (b, i, ru, en) VALUES {values};")
+
+    return {k: book[k]['ru'] for k in range(i, j)}
