@@ -83,6 +83,7 @@
 .title {
   text-align: center;
   font-size: 32px;
+  color: #3fa883;
 }
 
 .grid p {
@@ -121,7 +122,7 @@
 .back-btn {
   position: fixed;
   font-family: system-ui;
-  font-size: 35px;
+  font-size: 32px;
   top: 20px;
   left: 20px;
   width: 56px;
@@ -151,7 +152,7 @@
 .save-btn {
   position: fixed;
   font-family: system-ui;
-  font-size: 35px;
+  font-size: 32px;
   bottom: 20px;
   right: 20px;
   width: 56px;
