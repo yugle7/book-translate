@@ -165,7 +165,7 @@ saveBtn.addEventListener("click", () => {
   const leftCells = grid.querySelectorAll(".left");
   let text = "";
   leftCells.forEach((cell) => {
-    text += cell.textContent + "\n";
+    text += cell.textContent + "\n\n";
   });
 
   const blob = new Blob([text], { type: "text/plain" });
