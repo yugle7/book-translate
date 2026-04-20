@@ -103,7 +103,7 @@ function initEditor() {
     activeSplitter.classList.add("dragging");
     document.body.style.cursor = "col-resize";
 
-    const leftColRect = grid.getSelector(".left").getBoundingClientRect();
+    const leftColRect = grid.querySelector(".left").getBoundingClientRect();
     startLeftWidth = leftColRect.width;
     startX = e.clientX;
 
@@ -173,4 +173,16 @@ saveBtn.addEventListener("click", () => {
   a.download = "translation.txt";
   a.click();
   URL.revokeObjectURL(url);
+});
+
+const backBtn = document.getElementById("backBtn");
+backBtn.addEventListener("click", () => {
+  grid.classList.add("hidden");
+  downloadScreen.classList.remove("hidden");
+
+  const paragraphs = grid.querySelectorAll("p");
+  paragraphs.forEach((p) => p.remove());
+
+  const gutters = grid.querySelectorAll("div");
+  gutters.forEach((g) => g.remove());
 });

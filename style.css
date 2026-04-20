@@ -80,6 +80,11 @@
   color: #fff;
 }
 
+.title {
+  text-align: center;
+  font-size: 32px;
+}
+
 .grid p {
   user-select: text;
   padding: 20px;
@@ -111,6 +116,36 @@
 
 .grid p.editable {
   background: #2a3a2a;
+}
+
+.back-btn {
+  position: fixed;
+  font-family: system-ui;
+  font-size: 35px;
+  top: 20px;
+  left: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #3fa883;
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.8;
+  transition: all 0.3s;
+  z-index: 1000;
+}
+
+.back-btn:hover {
+  background: #318b5b;
+  transform: scale(1.1);
+}
+
+.back-btn:active {
+  transform: scale(0.95);
 }
 
 .save-btn {
