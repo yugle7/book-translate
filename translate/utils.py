@@ -23,40 +23,39 @@ payload = {
 
 
 def get_ij(book, i, d=5):
-    j = i + 1
-    while i and not book[i - 1]['ru'] and j - i < d:
+    k = max(0, i - d + 1)
+    while i > k and not book[i - 1]['ru']:
         i -= 1
-    j = min(max(j, i + d), len(book))
+    j = min(i + d, len(book))
     return i, j
 
 
-def get_title(text):
-    texts = text.split()
-    if len(texts) > 16:
-        for i, t in enumerate(texts, 1):
+def get_title(text: str) -> str:
+    words = text.split()
+    if len(words) > 16:
+        for i, t in enumerate(words, 1):
             if t.endswith('.'):
-                texts = texts[:i]
+                words = words[:i]
                 break
-    if len(texts) > 16:
-        for i, t in enumerate(texts, 1):
+    if len(words) > 16:
+        for i, t in enumerate(words, 1):
             if i >= 4 and t.endswith(','):
-                texts = texts[:i]
+                words = words[:i]
                 break
-    title = ' '.join(texts[:16]).title()
-    return re.sub(r'\s*\W+\s*', ' ', title)
+    title = ' '.join(words[:16])
+    title = re.sub(r'\W+', ' ', title)
+    return ' '.join(t.capitalize() for t in title.split())
 
 
-def translate(book, i):
-    i, j = get_ij(book, i)
-    assert i < j
-
+def translate(book, i: int, j: int) -> bool:
     payload['texts'] = [book[k]['en'] for k in range(i, j)]
     response = requests.post(url, headers=headers, json=payload)
 
-    if response.ok:
-        result = response.json()
-        print('result:', result)
-        for k, r in enumerate(result['translations'], i):
-            book[k]['ru'] = r['text']
+    if not response.ok:
+        return False
 
-    return i, j
+    result = response.json()
+    print('result:', result)
+    for k, r in enumerate(result['translations'], i):
+        book[k]['ru'] = r['text']
+    return True

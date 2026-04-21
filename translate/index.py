@@ -43,7 +43,7 @@ if __name__ == '__main__':
         # 'httpMethod': 'POST',
         'httpMethod': 'GET',
         # 'queryStringParameters': {'b': -4},
-        'queryStringParameters': {'b': 7, 'i': 3},
+        'queryStringParameters': {'b': 22, 'i': 22},
         # 'queryStringParameters': {},
         # 'body': base64.b64encode('text'.encode('utf-8')),
         # 'isBase64Encoded': True
