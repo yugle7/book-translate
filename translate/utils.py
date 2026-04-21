@@ -21,8 +21,17 @@ payload = {
 }
 
 
-def translate(book, i, j):
-    print(i, j)
+def get_ij(book, i, d=5):
+    j = i + 1
+    while i and not book[i - 1]['ru'] and j - i < d:
+        i -= 1
+    j = min(max(j, i + d), len(book))
+    return i, j
+
+
+def translate(book, i):
+    i, j = get_ij(book, i)
+
     payload['texts'] = [book[k]['en'] for k in range(i, j)]
     response = requests.post(url, headers=headers, json=payload)
 

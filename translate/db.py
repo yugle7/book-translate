@@ -64,11 +64,8 @@ def edit_book(b, text):
 
 def translate_book(b, i):
     book = execute(f"SELECT ru, en FROM books WHERE b={b} ORDER BY i;")
-    j = i + 1
-    while i and not book[i - 1]['ru']:
-        i -= 1
 
-    i, j = translate(book, i, j)
+    i, j = translate(book, i)
     execute(f'DELETE FROM books WHERE b={b} and i >= {i} and i < {j}')
 
     values = ",".join(f'({b}, {k}, "{book[k]['ru']}", "{book[k]['en']}")' for k in range(i, j))

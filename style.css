@@ -156,6 +156,7 @@ p:empty:hover {
     top: 20px;
     left: 20px;
 }
+
 .save-btn:hover,
 .back-btn:hover {
     background: #318b5b;
@@ -167,3 +168,7 @@ p:empty:hover {
     transform: scale(0.95);
 }
 
+p:nth-child(1 of .left:empty)::before {
+    content: "Нажать чтобы перевести ...";
+    opacity: 0.3;
+}
