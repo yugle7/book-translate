@@ -54,7 +54,7 @@ function showEditor(texts) {
 
         const right = document.createElement("p");
         right.classList.add("right");
-        right.textContent = (i - 1).toString() + '. ' + t;
+        right.textContent = t;
         grid.appendChild(right);
     });
 
@@ -79,7 +79,7 @@ function viewEditor(book) {
 
         const right = document.createElement("p");
         right.classList.add("right");
-        right.textContent = (i - 1).toString() + '. ' + t.en;
+        right.textContent = t.en;
         grid.appendChild(right);
     });
 
@@ -334,7 +334,7 @@ const translate = async (e) => {
         for (const [i, ru] of Object.entries(data)) {
             const p = document.getElementById(i);
             p.removeEventListener("click", translate);
-            p.textContent = i + '. ' + ru;
+            p.textContent = ru;
             console.log(p.textContent, p)
         }
     } catch (error) {

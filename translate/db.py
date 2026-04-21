@@ -1,3 +1,5 @@
+from time import sleep
+
 import ydb
 import ydb.iam
 import re
@@ -113,12 +115,11 @@ def translate_book(b, i):
     if not translate(book, i, j):
         return {}
 
-    execute(f"DELETE FROM translates WHERE b=={b} and i>={i} and i<{j}")
-
     query = '''
         DECLARE $data AS List<Struct<b:Uint64, i:Uint32, ru:Utf8, en:Utf8>>;
+        DELETE FROM translates WHERE b=={b} and i>={i} and i<{j};
         INSERT INTO translates (b, i, ru, en)
-        SELECT b, i, ru, en FROM AS_TABLE($data) AS d
+        SELECT b, i, ru, en FROM AS_TABLE($data) AS d;
     '''
     execute(query, {'$data': [
         {'b': b, 'i': k, 'ru': book[k]['ru'], 'en': book[k]['en']}
