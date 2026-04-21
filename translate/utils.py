@@ -1,4 +1,5 @@
 import os
+import re
 
 import requests
 
@@ -30,11 +31,24 @@ def get_ij(book, i, d=5):
 
 
 def get_title(text):
-    return ' '.join(text.split()[:16]).title()
+    texts = text.split()
+    if len(texts) > 16:
+        for i, t in enumerate(texts, 1):
+            if t.endswith('.'):
+                texts = texts[:i]
+                break
+    if len(texts) > 16:
+        for i, t in enumerate(texts, 1):
+            if i >= 4 and t.endswith(','):
+                texts = texts[:i]
+                break
+    title = ' '.join(texts[:16]).title()
+    return re.sub(r'\s*\W+\s*', ' ', title)
 
 
 def translate(book, i):
     i, j = get_ij(book, i)
+    assert i < j
 
     payload['texts'] = [book[k]['en'] for k in range(i, j)]
     response = requests.post(url, headers=headers, json=payload)

@@ -15,13 +15,27 @@ fileInput.addEventListener("change", async (e) => {
     if (!file) return;
 
     const text = await file.text();
+    if (!text) return;
+
     const texts = text.split(/\s*\n+\s*/).filter(t => t !== '');
+    if (!texts) return;
 
     showEditor(texts);
 
     fileInput.value = "";
-    await sendText(text);
+    await createBook(text);
+
+    const title = getTitle(texts[0]);
+    addBook({id: b, title});
 });
+
+const addBook = ({id, title}) => {
+    const book = document.createElement('a')
+    book.innerText = title;
+    book.id = id;
+    book.addEventListener('click', loadBook)
+    downloadScreen.appendChild(book);
+}
 
 function showEditor(texts) {
     downloadScreen.classList.add("hidden");
@@ -242,16 +256,9 @@ const getBooks = async () => {
     const url = new URL(endpoint);
     try {
         const response = await fetch(url);
-        books = await response.json();
-        console.log('books:', books)
+        const books = await response.json();
 
-        books.forEach((q) => {
-            const book = document.createElement('a')
-            book.innerText = q.title;
-            book.id = q.id;
-            book.addEventListener('click', loadBook)
-            downloadScreen.appendChild(book);
-        })
+        books.forEach(addBook);
     } catch (error) {
         console.error("Error sending to server:", error);
     }
@@ -259,16 +266,43 @@ const getBooks = async () => {
 
 getBooks();
 
+function getTitle(text) {
+    let words = text.split(/\s+/);
 
-const sendText = async (text) => {
-    console.log("sendText:", text.length);
+    if (words.length > 16) {
+        for (let i = 0; i < words.length; i++) {
+            if (words[i].endsWith('.')) {
+                words = words.slice(0, i + 1);
+                break;
+            }
+        }
+    }
+
+    if (words.length > 16) {
+        for (let i = 0; i < words.length; i++) {
+            if (i >= 3 && words[i].endsWith(',')) {
+                words = words.slice(0, i + 1);
+                break;
+            }
+        }
+    }
+
+    const titleWords = words.slice(0, 16);
+    let title = titleWords.map(word =>
+        word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    ).join(' ');
+
+    return title.replace(/\s*\W+\s*/g, ' ');
+}
+
+
+const createBook = async (text) => {
+    console.log("createBook:", text.length);
     const url = new URL(endpoint);
     try {
         const response = await fetch(url, {
             method: "POST",
-            headers: {
-                "Content-Type": "text/plain",
-            },
+            headers: {"Content-Type": "text/plain"},
             body: text,
         });
         b = await response.text();

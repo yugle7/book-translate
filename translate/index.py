@@ -1,8 +1,5 @@
 import base64
-import os
 import db
-import hashlib
-import json
 
 import dotenv
 
@@ -46,7 +43,8 @@ if __name__ == '__main__':
         # 'httpMethod': 'POST',
         'httpMethod': 'GET',
         # 'queryStringParameters': {'b': -4},
-        'queryStringParameters': {},
+        'queryStringParameters': {'b': 7, 'i': 3},
+        # 'queryStringParameters': {},
         # 'body': base64.b64encode('text'.encode('utf-8')),
         # 'isBase64Encoded': True
     }, None))
