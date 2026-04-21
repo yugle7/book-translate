@@ -168,7 +168,7 @@ p:empty {
 }
 
 p:nth-child(1 of .left:empty)::before {
-    content: "Нажать чтобы перевести ...";
+    content: "Перевести";
     opacity: 0.3;
 }
 
