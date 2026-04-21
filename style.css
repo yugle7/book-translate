@@ -83,6 +83,7 @@
     text-align: center;
     font-size: 32px;
     color: #3fa883;
+    line-height: 3;
 }
 
 .grid p {
@@ -96,9 +97,7 @@ p:empty {
     cursor: pointer;
 }
 
-p:empty:hover {
-    background: #262626;
-}
+
 
 .left {
     background: #222;
@@ -170,5 +169,14 @@ p:empty:hover {
 
 p:nth-child(1 of .left:empty)::before {
     content: "Нажать чтобы перевести ...";
+    opacity: 0.3;
+}
+
+p:empty:hover {
+    background: #262626;
+}
+
+p:empty:hover::before {
+    content: "...";
     opacity: 0.3;
 }
