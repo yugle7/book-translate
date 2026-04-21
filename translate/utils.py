@@ -29,6 +29,10 @@ def get_ij(book, i, d=5):
     return i, j
 
 
+def get_title(text):
+    return ' '.join(text.split()[:16]).title()
+
+
 def translate(book, i):
     i, j = get_ij(book, i)
 

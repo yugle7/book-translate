@@ -5,6 +5,7 @@ from time import time
 
 import os
 
+from translate.utils import get_title
 from utils import translate
 
 import dotenv
@@ -14,8 +15,8 @@ dotenv.load_dotenv()
 driver = ydb.Driver(
     endpoint=os.getenv("YDB_ENDPOINT"),
     database=os.getenv("YDB_DATABASE"),
-    # credentials=ydb.AuthTokenCredentials(os.getenv('IAM_TOKEN')),
-    credentials=ydb.iam.MetadataUrlCredentials(),
+    credentials=ydb.AuthTokenCredentials(os.getenv('IAM_TOKEN')),
+    # credentials=ydb.iam.MetadataUrlCredentials(),
 )
 
 driver.wait(fail_fast=True, timeout=5)
@@ -39,36 +40,54 @@ def execute(yql):
     return pool.retry_operation_sync(wrapper)
 
 
-def add_book(text):
-    b = int(time())
-    texts = re.split(r'\s*\n+\s*', text)
+def get_books():
+    return execute("SELECT id, title FROM rules;")
+
+
+def delete_book(b):
+    execute(f"DELETE FROM translates WHERE b={b};")
+    return execute(f"DELETE FROM rules WHERE id={b};")
+
+
+def create_book(text):
+    texts = re.split(r"\s*\n+\s*", text)
     texts = [t for t in texts if t]
+
+    title = get_title(texts[0])
+    res = execute(f'INSERT INTO rules (title) VALUES ("{title}") RETURNING id;')
+    b = res[0]["id"]
+
     values = ",".join(f'({b}, {i}, "{en}")' for i, en in enumerate(texts))
-    execute(f"INSERT INTO books (b, i, en) VALUES {values};")
+    execute(f"INSERT INTO translates (b, i, en) VALUES {values};")
+
     return b
 
 
 def load_book(b):
-    return execute(f"SELECT ru, en FROM books WHERE b={b} ORDER BY i;")
+    return execute(f"SELECT ru, en FROM translates WHERE b={b} ORDER BY i;")
 
 
 def edit_book(b, text):
-    book = execute(f"SELECT ru, en FROM books WHERE b={b} ORDER BY i;")
-    for i, ru in enumerate(text.split('\n')):
-        book[i]['ru'] = ru
-    execute(f"DELETE FROM books WHERE b={b};")
-    values = ",".join(f'({b}, {i}, "{q['ru']}", "{q['en']}")' for i, q in enumerate(book))
-    execute(f"INSERT INTO books (b, i, ru, en) VALUES {values};")
+    book = execute(f"SELECT ru, en FROM translates WHERE b={b} ORDER BY i;")
+    for i, ru in enumerate(text.split("\n")):
+        book[i]["ru"] = ru
+    execute(f"DELETE FROM translates WHERE b={b};")
+    values = ",".join(
+        f'({b}, {i}, "{q['ru']}", "{q['en']}")' for i, q in enumerate(book)
+    )
+    execute(f"INSERT INTO translates (b, i, ru, en) VALUES {values};")
     return {}
 
 
 def translate_book(b, i):
-    book = execute(f"SELECT ru, en FROM books WHERE b={b} ORDER BY i;")
+    book = execute(f"SELECT ru, en FROM translates WHERE b={b} ORDER BY i;")
 
     i, j = translate(book, i)
-    execute(f'DELETE FROM books WHERE b={b} and i >= {i} and i < {j}')
+    execute(f"DELETE FROM translates WHERE b={b} and i >= {i} and i < {j}")
 
-    values = ",".join(f'({b}, {k}, "{book[k]['ru']}", "{book[k]['en']}")' for k in range(i, j))
-    execute(f"INSERT INTO books (b, i, ru, en) VALUES {values};")
+    values = ",".join(
+        f'({b}, {k}, "{book[k]['ru']}", "{book[k]['en']}")' for k in range(i, j)
+    )
+    execute(f"INSERT INTO translates (b, i, ru, en) VALUES {values};")
 
-    return {k: book[k]['ru'] for k in range(i, j)}
+    return {k: book[k]["ru"] for k in range(i, j)}

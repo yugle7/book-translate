@@ -18,6 +18,7 @@
     "Helvetica Neue",
     sans-serif;
     background-color: #222;
+    color: #fff;
 }
 
 *,
@@ -27,45 +28,23 @@
 }
 
 .download-screen {
+    margin: 0 auto;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    background: #222;
+    gap: 20px;
+    padding-top: 50px;
+    max-width: 400px;
 }
 
-.download-content {
-    text-align: center;
-    color: #fff;
-}
-
-.download-content h1 {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-    font-weight: 300;
-}
-
-.download-content p {
-    font-size: 1.1rem;
-    opacity: 0.7;
-    margin-bottom: 2rem;
-}
-
-.upload-btn {
-    padding: 16px 32px;
-    font-size: 1.1rem;
-    background: #3fa883;
-    color: white;
-    border: none;
-    border-radius: 8px;
+a {
     cursor: pointer;
-    transition: all 0.3s;
 }
 
-.upload-btn:hover {
-    background: #318b5b;
-    transform: translateY(-2px);
+a:hover {
+    opacity: 0.8;
 }
+
 
 .hidden {
     display: none !important;
@@ -76,7 +55,6 @@
     grid-template-rows: auto auto auto;
     grid-template-columns: 1fr 5px 1fr;
     min-height: 100vh;
-    color: #fff;
 }
 
 .title {
@@ -96,7 +74,6 @@
 p:empty {
     cursor: pointer;
 }
-
 
 
 .left {
@@ -125,20 +102,30 @@ p:empty {
     background: #2a3a2a;
 }
 
+.upload-btn {
+    padding: 16px 32px;
+    font-size: 1.1rem;
+    background: #3fa883;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
 .save-btn,
 .back-btn {
-    position: fixed;
+    position: absolute;
     font-family: system-ui;
     font-size: 32px;
-
     width: 56px;
     height: 56px;
     border-radius: 50%;
     background: #3fa883;
-    color: white;
     border: none;
     cursor: pointer;
     display: flex;
+    text-align: center;
     align-items: center;
     justify-content: center;
     opacity: 0.8;
@@ -146,6 +133,7 @@ p:empty {
     z-index: 1000;
 }
 
+.upload-btn,
 .save-btn {
     bottom: 20px;
     right: 20px;
