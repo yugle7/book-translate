@@ -223,11 +223,15 @@ let b = null;
 let books = [];
 
 const loadBook = async (e) => {
-    console.log("loadBook:", e.target.id);
+    b = e.target.id;
+
+    console.log("loadBook:", b);
     const url = new URL(endpoint);
+    url.searchParams.set("b", b)
     try {
         const response = await fetch(url);
         const book = await response.json();
+        console.log('book:', book)
         viewEditor(book)
     } catch (error) {
         console.error("Error sending to server:", error);
@@ -239,6 +243,7 @@ const getBooks = async () => {
     try {
         const response = await fetch(url);
         books = await response.json();
+        console.log('books:', books)
 
         books.forEach((q) => {
             const book = document.createElement('a')
@@ -252,7 +257,7 @@ const getBooks = async () => {
     }
 }
 
-getBooks().then();
+getBooks();
 
 
 const sendText = async (text) => {

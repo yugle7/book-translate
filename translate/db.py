@@ -1,12 +1,10 @@
 import ydb
 import ydb.iam
 import re
-from time import time
 
 import os
 
-from translate.utils import get_title
-from utils import translate
+from utils import translate, get_title
 
 import dotenv
 
