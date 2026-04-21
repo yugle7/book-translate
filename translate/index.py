@@ -1,9 +1,35 @@
 import base64
+import gzip
+
 import db
 
 import dotenv
 
 dotenv.load_dotenv()
+
+
+def get_text(event):
+    body = event.get("body")
+    if not body:
+        return ""
+
+    is_base64 = event.get("isBase64Encoded", False)
+
+    # 1. Декодируем base64, если нужно
+    raw_data = base64.b64decode(body) if is_base64 else body.encode("utf-8")
+
+    # 2. Проверяем заголовок Content-Encoding
+    headers = event.get("headers", {})
+    content_encoding = headers.get("content-encoding", "")
+
+    if "gzip" in content_encoding:
+        try:
+            raw_data = gzip.decompress(raw_data)
+        except gzip.BadGzipFile:
+            return ""
+
+    # 3. Декодируем текст
+    return raw_data.decode("utf-8")
 
 
 def handler(event, context):
@@ -12,13 +38,7 @@ def handler(event, context):
 
     b = params.get("b")
     i = params.get("i")
-    text = None
-
-    if event["httpMethod"] == "POST":
-        body = event.get("body")
-        if event.get("isBase64Encoded"):
-            text = base64.b64decode(body).decode("utf-8")
-            print(text)
+    text = get_text(event)
 
     if b:
         b = int(b)
@@ -43,7 +63,7 @@ if __name__ == '__main__':
         # 'httpMethod': 'POST',
         'httpMethod': 'GET',
         # 'queryStringParameters': {'b': -4},
-        'queryStringParameters': {'b': 22, 'i': 22},
+        'queryStringParameters': {'b': 27, 'i': 88},
         # 'queryStringParameters': {},
         # 'body': base64.b64encode('text'.encode('utf-8')),
         # 'isBase64Encoded': True

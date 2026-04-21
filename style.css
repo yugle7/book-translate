@@ -45,6 +45,7 @@ a:hover {
 }
 
 
+
 .hidden {
     display: none !important;
 }
@@ -61,6 +62,10 @@ a:hover {
     font-size: 32px;
     color: #3fa883;
     line-height: 3;
+}
+
+.header {
+    color: #1c5a3a;
 }
 
 .grid p {

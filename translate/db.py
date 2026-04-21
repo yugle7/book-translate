@@ -19,11 +19,11 @@ driver = ydb.Driver(
     # credentials=ydb.iam.MetadataUrlCredentials(),
 )
 
-driver.wait(fail_fast=True, timeout=5)
+driver.wait(fail_fast=True, timeout=50)
 
 pool = ydb.SessionPool(driver)
 
-settings = ydb.BaseRequestSettings().with_timeout(3).with_operation_timeout(2)
+settings = ydb.BaseRequestSettings().with_timeout(30).with_operation_timeout(20)
 
 
 def execute(yql, params=None):
@@ -106,23 +106,18 @@ def edit_book(b, text):
     ]})
 
 
-def translate_book(b, i):
+def translate_book(b, i, d=5):
     print('translate_book:', b, i)
-    book = execute(f"SELECT ru, en FROM translates WHERE b=={b} ORDER BY i;")
-    print('book:', book)
 
-    i, j = get_ij(book, i)
-    if not translate(book, i, j):
+    t = execute(f"SELECT id, i, en FROM translates WHERE b=={b} and i>={i - d} and i<={i + d} and ru is null;")
+    if not t or not translate(t):
         return {}
 
     query = '''
-        DECLARE $data AS List<Struct<b:Uint64, i:Uint32, ru:Utf8, en:Utf8>>;
-        DELETE FROM translates WHERE b=={b} and i>={i} and i<{j};
-        INSERT INTO translates (b, i, ru, en)
-        SELECT b, i, ru, en FROM AS_TABLE($data) AS d;
+        DECLARE $updates AS List<Struct<id: Int64, ru: Utf8>>;
+        UPDATE translates ON
+        SELECT id, ru
+        FROM AS_TABLE($updates) AS u;
     '''
-    execute(query, {'$data': [
-        {'b': b, 'i': k, 'ru': book[k]['ru'], 'en': book[k]['en']}
-        for k in range(i, j)
-    ]})
-    return {k: book[k]["ru"] for k in range(i, j)}
+    execute(query, {'$updates': [{'id': q['id'], 'ru': q['ru']} for q in t]})
+    return {q['i']: q["ru"] for q in t}

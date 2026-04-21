@@ -4,11 +4,9 @@ const fileInput = document.getElementById("fileInput");
 const grid = document.getElementById("resizableGrid");
 
 let editable = null;
-let translating = false;
+let isTranslating = false;
 
-uploadBtn.addEventListener("click", () => {
-    fileInput.click();
-});
+uploadBtn.onclick = () => fileInput.click();
 
 fileInput.addEventListener("change", async (e) => {
     const file = e.target.files[0];
@@ -26,61 +24,68 @@ fileInput.addEventListener("change", async (e) => {
     await createBook(text);
 
     const title = getTitle(texts[0]);
-    addBook({id: b, title});
+    addBook({title});
 });
 
 const addBook = ({id, title}) => {
     const book = document.createElement('a')
     book.innerText = title;
-    book.id = id;
-    book.addEventListener('click', loadBook)
+    book.dataset.b = id || b;
+    book.onclick = loadBook;
     downloadScreen.appendChild(book);
 }
 
+
+const addParagraph = (side, text = "") => {
+    const p = document.createElement("p");
+    p.classList.add(side);
+    if (text) {
+        if (text[0] === '#') {
+            p.classList.add("header");
+        }
+        p.textContent = text;
+    } else if (side === 'left') {
+        p.onclick = translate;
+    }
+    grid.appendChild(p);
+    return p;
+}
+
 function showEditor(texts) {
+    console.log('showEditor');
     downloadScreen.classList.add("hidden");
     grid.classList.remove("hidden");
 
     let i = 0;
     texts.forEach((t) => {
-        const left = document.createElement("p");
-        left.classList.add("left");
-        left.id = i++;
-        left.addEventListener("click", translate);
-        grid.appendChild(left);
+        const p = addParagraph('left')
+        p.id = i++;
 
         const gutter = document.createElement("div");
         grid.appendChild(gutter);
 
-        const right = document.createElement("p");
-        right.classList.add("right");
-        right.textContent = t;
-        grid.appendChild(right);
+        addParagraph('right', t)
     });
 
     initEditor();
 }
 
 function viewEditor(book) {
+    console.log('viewEditor');
     downloadScreen.classList.add("hidden");
     grid.classList.remove("hidden");
 
+    console.log(book.slice(0, 10));
+
     let i = 0;
     book.forEach((t) => {
-        const left = document.createElement("p");
-        left.classList.add("left");
-        left.id = i++;
-        left.textContent = t.ru;
-        left.addEventListener("click", translate);
-        grid.appendChild(left);
+        const p = addParagraph('left', t.ru)
+        p.id = i++;
 
         const gutter = document.createElement("div");
         grid.appendChild(gutter);
 
-        const right = document.createElement("p");
-        right.classList.add("right");
-        right.textContent = t.en;
-        grid.appendChild(right);
+        addParagraph('right', t.en)
     });
 
     initEditor();
@@ -130,15 +135,16 @@ function initEditor() {
 
     function handleCellClick(e) {
         if (isDragging) return;
+        e.preventDefault();
         if (e.target.tagName !== "P") return;
         if (e.target.classList.contains("editable")) return;
         if (editable) {
             editable.classList.remove("editable");
             editable.contentEditable = false;
-            editable.removeEventListener("keydown", editableKeydown);
+            editable.onkeydown = null;
         }
         editable = e.target;
-        editable.addEventListener("keydown", editableKeydown);
+        editable.onkeydown = editableKeydown;
         makeEditable(editable, e.clientX, e.clientY);
     }
 
@@ -187,14 +193,14 @@ function initEditor() {
 
     const gutters = grid.querySelectorAll("div");
     gutters.forEach((gutter) => {
-        gutter.addEventListener("mousedown", handleMouseDown);
+        gutter.onmousedown = handleMouseDown;
     });
 
-    grid.addEventListener("click", handleCellClick);
+    grid.onclick = handleCellClick;
 
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
-    document.addEventListener("mouseleave", handleMouseUp);
+    document.onmousemove = handleMouseMove;
+    document.onmouseup = handleMouseUp;
+    document.onmouseleave = handleMouseUp;
 }
 
 const editableKeydown = (e) => {
@@ -205,7 +211,7 @@ const editableKeydown = (e) => {
 };
 
 const saveBtn = document.getElementById("saveBtn");
-saveBtn.addEventListener("click", () => {
+saveBtn.onclick = () => {
     const leftCells = grid.querySelectorAll(".left");
     let text = "";
     leftCells.forEach((cell) => {
@@ -219,51 +225,49 @@ saveBtn.addEventListener("click", () => {
     a.download = "translation.txt";
     a.click();
     URL.revokeObjectURL(url);
-});
+};
 
 const backBtn = document.getElementById("backBtn");
-backBtn.addEventListener("click", () => {
+backBtn.onclick = () => {
     grid.classList.add("hidden");
     downloadScreen.classList.remove("hidden");
 
     Array.from(grid.children)
         .slice(5)
         .forEach((q) => q.remove());
-});
+};
 
 // отправка и получение данных
 const endpoint = "https://functions.yandexcloud.net/d4e334h03qlqjf04arau";
 let b = null;
 
 const loadBook = async (e) => {
-    b = e.currentTarget.id;
+    e.preventDefault();
+    b = e.currentTarget.dataset.b;
+    console.log('loadBook:', b);
 
-    console.log("loadBook:", b);
     const url = new URL(endpoint);
     url.searchParams.set("b", b)
     try {
         const response = await fetch(url);
         const book = await response.json();
-        console.log('book:', book)
         viewEditor(book)
     } catch (error) {
         console.error("Error sending to server:", error);
     }
 }
 
+
 const getBooks = async () => {
-    const url = new URL(endpoint);
-    try {
-        const response = await fetch(url);
-        const books = await response.json();
+    console.log('getBooks')
+    const response = await fetch(endpoint);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return await response.json();
+};
 
-        books.forEach(addBook);
-    } catch (error) {
-        console.error("Error sending to server:", error);
-    }
-}
-
-getBooks();
+getBooks()
+    .then(books => books.forEach(addBook))
+    .catch(error => console.error(error));
 
 function getTitle(text) {
     let words = text.split(/\s+/);
@@ -289,57 +293,71 @@ function getTitle(text) {
     let title = words.slice(0, 16).join(' ');
     title = title.replace(/\W+/g, ' ');
 
-    return title.split(/\s+/).map(word =>
-        word.charAt(0).toUpperCase() + word.slice(1)
-    ).join(' ');
+    return title.split(/\s+/).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 }
 
 
+// const createBook = async (text) => {
+//     console.log('createBook:', text.length);
+//     const url = new URL(endpoint);
+//     try {
+//         const response = await fetch(url, {
+//             method: "POST", headers: {"Content-Type": "text/plain"}, body: text,
+//         });
+//         if (!response.ok) {
+//             console.log(response);
+//         }
+//         b = await response.text();
+//     } catch (error) {
+//         console.error("Error sending to server:", error);
+//     }
+// };
+
 const createBook = async (text) => {
-    console.log("createBook:", text.length);
+    console.log('createBook:', text.length);
     const url = new URL(endpoint);
-    try {
-        const response = await fetch(url, {
-            method: "POST",
-            headers: {"Content-Type": "text/plain"},
-            body: text,
-        });
-        b = await response.text();
-    } catch (error) {
-        console.error("Error sending to server:", error);
-    }
+    const stream = new Blob([text])
+        .stream()
+        .pipeThrough(new CompressionStream('gzip'));
+    const blob = await new Response(stream).blob();
+    await fetch(url, {
+        method: 'POST',
+        headers: {'Content-Encoding': 'gzip'},
+        body: blob
+    });
 };
 
+
 const translate = async (e) => {
-    if (translating) {
-        return;
-    }
-    translating = true;
+    if (isTranslating) return;
+    e.preventDefault();
+    isTranslating = true;
     const i = e.currentTarget.id;
-    console.log("translate:", i);
+    console.log('translate:', i)
 
     const url = new URL(endpoint);
     url.searchParams.set("i", i);
     url.searchParams.set("b", b);
     try {
         const response = await fetch(url);
-        console.log(url);
-        console.log(response);
         if (!response.ok) {
             return;
         }
         const data = await response.json();
-        console.log('data:', data);
 
         for (const [i, ru] of Object.entries(data)) {
             const p = document.getElementById(i);
-            p.removeEventListener("click", translate);
+            p.onclick = null;
             p.textContent = ru;
-            console.log(p.textContent, p)
+            if (ru && ru[0] === '#') {
+                p.classList.add('header')
+            } else {
+                p.classList.remove('header');
+            }
         }
     } catch (error) {
         console.error("Error sending to server:", error);
     } finally {
-        translating = false;
+        isTranslating = false;
     }
 };

@@ -47,15 +47,15 @@ def get_title(text: str) -> str:
     return ' '.join(t.capitalize() for t in title.split())
 
 
-def translate(book, i: int, j: int) -> bool:
-    payload['texts'] = [book[k]['en'] for k in range(i, j)]
+def translate(t) -> bool:
+    payload['texts'] = [q['en'] for q in t]
     response = requests.post(url, headers=headers, json=payload)
 
     if not response.ok:
         return False
 
     result = response.json()
-    print('result:', result)
-    for k, r in enumerate(result['translations'], i):
-        book[k]['ru'] = r['text']
+    for q, r in zip(t, result['translations']):
+        q['ru'] = r['text']
+
     return True
