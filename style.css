@@ -97,7 +97,7 @@ p:empty {
 }
 
 p:empty:hover {
-    background: #333;
+    background: #262626;
 }
 
 .left {
@@ -105,7 +105,7 @@ p:empty:hover {
 }
 
 .right {
-    background: #222222e7;
+    background: #222;
 }
 
 .grid div {
