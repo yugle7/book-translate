@@ -72,7 +72,7 @@ function showEditor(texts) {
 }
 
 function viewEditor(book) {
-    console.log('viewEditor');
+    console.log('viewEditor:', book.length);
     downloadScreen.classList.add("hidden");
     grid.classList.remove("hidden");
 
@@ -237,8 +237,7 @@ backBtn.onclick = () => {
 };
 
 // отправка и получение данных
-const api = "https://functions.yandexcloud.net/d4e334h03qlqjf04arau";
-const apigw = "https://d5ds1trsppqs2rog97qd.cmxivbes.apigw.yandexcloud.net";
+const api = "https://d5ds1trsppqs2rog97qd.cmxivbes.apigw.yandexcloud.net";
 let b = null;
 
 const loadBook = async (e) => {
@@ -250,8 +249,12 @@ const loadBook = async (e) => {
     url.searchParams.set("b", b)
     try {
         const response = await fetch(url);
-        const book = await response.json();
-        viewEditor(book)
+        if (!response.ok) {
+            console.error(response)
+        } else {
+            const book = await response.json();
+            viewEditor(book)
+        }
     } catch (error) {
         console.error("Error sending to server:", error);
     }
@@ -299,7 +302,7 @@ function getTitle(text) {
 
 const createBook = async (text) => {
     console.log('createBook:', text.length);
-    const url = new URL(apigw);
+    const url = new URL(api);
     try {
         const textBlob = new Blob([text], {type: 'text/plain; charset=utf-8'});
         const compressedStream = textBlob.stream().pipeThrough(new CompressionStream('gzip'));
