@@ -1,5 +1,6 @@
 import base64
 import gzip
+import json
 
 import db
 
@@ -16,25 +17,35 @@ def get_text(event):
     is_base64 = event.get("isBase64Encoded", False)
 
     # 1. Декодируем base64, если нужно
-    raw_data = base64.b64decode(body) if is_base64 else body.encode("utf-8")
+    try:
+        raw_data = base64.b64decode(body) if is_base64 else body.encode()
+    except Exception as e:
+        print(e)
+        return ""
 
     # 2. Проверяем заголовок Content-Encoding
     headers = event.get("headers", {})
-    content_encoding = headers.get("content-encoding", "")
+    content_encoding = headers.get("content-encoding") or headers.get("Content-Encoding", "")
 
     if "gzip" in content_encoding:
         try:
             raw_data = gzip.decompress(raw_data)
-        except gzip.BadGzipFile:
+        except gzip.BadGzipFile as e:
+            print(e)
             return ""
 
     # 3. Декодируем текст
-    return raw_data.decode("utf-8")
+    try:
+        return raw_data.decode("utf-8")
+    except UnicodeDecodeError as e:
+        print(e)
+        return ""
+
 
 
 def handler(event, context):
-    params = event["queryStringParameters"] or {}
     print(event)
+    params = event["queryStringParameters"] or {}
 
     b = params.get("b")
     i = params.get("i")
@@ -55,7 +66,11 @@ def handler(event, context):
     else:
         res = db.get_books()
 
-    return {"statusCode": 200, "body": res}
+    return {
+        "statusCode": 200,
+        "headers": {"content-type": "application/json"},
+        "body": json.dumps(res)
+    }
 
 
 if __name__ == '__main__':
@@ -63,7 +78,7 @@ if __name__ == '__main__':
         # 'httpMethod': 'POST',
         'httpMethod': 'GET',
         # 'queryStringParameters': {'b': -4},
-        'queryStringParameters': {'b': 27, 'i': 88},
+        'queryStringParameters': {'b': 27, 'i': 82},
         # 'queryStringParameters': {},
         # 'body': base64.b64encode('text'.encode('utf-8')),
         # 'isBase64Encoded': True

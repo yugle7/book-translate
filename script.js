@@ -8,9 +8,10 @@ let isTranslating = false;
 
 uploadBtn.onclick = () => fileInput.click();
 
-fileInput.addEventListener("change", async (e) => {
+fileInput.onchange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    console.log('onchange:', file)
 
     const text = await file.text();
     if (!text) return;
@@ -25,7 +26,7 @@ fileInput.addEventListener("change", async (e) => {
 
     const title = getTitle(texts[0]);
     addBook({title});
-});
+};
 
 const addBook = ({id, title}) => {
     const book = document.createElement('a')
@@ -74,8 +75,6 @@ function viewEditor(book) {
     console.log('viewEditor');
     downloadScreen.classList.add("hidden");
     grid.classList.remove("hidden");
-
-    console.log(book.slice(0, 10));
 
     let i = 0;
     book.forEach((t) => {
@@ -238,7 +237,8 @@ backBtn.onclick = () => {
 };
 
 // отправка и получение данных
-const endpoint = "https://functions.yandexcloud.net/d4e334h03qlqjf04arau";
+const api = "https://functions.yandexcloud.net/d4e334h03qlqjf04arau";
+const apigw = "https://d5ds1trsppqs2rog97qd.cmxivbes.apigw.yandexcloud.net";
 let b = null;
 
 const loadBook = async (e) => {
@@ -246,7 +246,7 @@ const loadBook = async (e) => {
     b = e.currentTarget.dataset.b;
     console.log('loadBook:', b);
 
-    const url = new URL(endpoint);
+    const url = new URL(api);
     url.searchParams.set("b", b)
     try {
         const response = await fetch(url);
@@ -260,7 +260,7 @@ const loadBook = async (e) => {
 
 const getBooks = async () => {
     console.log('getBooks')
-    const response = await fetch(endpoint);
+    const response = await fetch(api);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return await response.json();
 };
@@ -297,45 +297,43 @@ function getTitle(text) {
 }
 
 
-// const createBook = async (text) => {
-//     console.log('createBook:', text.length);
-//     const url = new URL(endpoint);
-//     try {
-//         const response = await fetch(url, {
-//             method: "POST", headers: {"Content-Type": "text/plain"}, body: text,
-//         });
-//         if (!response.ok) {
-//             console.log(response);
-//         }
-//         b = await response.text();
-//     } catch (error) {
-//         console.error("Error sending to server:", error);
-//     }
-// };
-
 const createBook = async (text) => {
     console.log('createBook:', text.length);
-    const url = new URL(endpoint);
-    const stream = new Blob([text])
-        .stream()
-        .pipeThrough(new CompressionStream('gzip'));
-    const blob = await new Response(stream).blob();
-    await fetch(url, {
-        method: 'POST',
-        headers: {'Content-Encoding': 'gzip'},
-        body: blob
-    });
+    const url = new URL(apigw);
+    try {
+        const textBlob = new Blob([text], {type: 'text/plain; charset=utf-8'});
+        const compressedStream = textBlob.stream().pipeThrough(new CompressionStream('gzip'));
+        const compressedBlob = await new Response(compressedStream).blob();
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain; charset=utf-8',
+                'Content-Encoding': 'gzip'
+            },
+            body: compressedBlob
+        });
+        if (!response.ok) {
+            console.log(response);
+        } else {
+            const data = await response.json();
+            b = data.b;
+        }
+    } catch (error) {
+        console.error("Error sending to server:", error);
+    }
 };
 
 
 const translate = async (e) => {
     if (isTranslating) return;
+    if (!/^\d+$/.test(b)) return;
     e.preventDefault();
     isTranslating = true;
     const i = e.currentTarget.id;
     console.log('translate:', i)
 
-    const url = new URL(endpoint);
+    const url = new URL(api);
     url.searchParams.set("i", i);
     url.searchParams.set("b", b);
     try {

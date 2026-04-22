@@ -81,12 +81,12 @@ def create_book(text):
         {'b': b, 'i': i, 'en': en}
         for i, en in enumerate(texts)
     ]})
-    return b
+    return {'b': b}
 
 
 def load_book(b):
     print('load_book:', b)
-    return execute(f"SELECT ru, en FROM translates WHERE b=={b} ORDER BY i;")
+    return execute(f"SELECT ru, en FROM translates WHERE b=={b} and i < 100 ORDER BY i;")
 
 
 def edit_book(b, text):
