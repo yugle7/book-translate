@@ -136,6 +136,7 @@ p:empty {
   height: 56px;
   border-radius: 50%;
   background: var(--accent);
+  color: var(--text-white);
   border: none;
   cursor: pointer;
   display: flex;
@@ -156,6 +157,11 @@ p:empty {
 .back-btn {
   top: 20px;
   left: 20px;
+}
+
+.upload-btn:hover {
+  background: var(--accent-hover);
+  transform: scale(1.01);
 }
 
 .save-btn:hover,
