@@ -12,8 +12,8 @@ load_dotenv()
 driver = ydb.Driver(
     endpoint=os.getenv("YDB_ENDPOINT"),
     database=os.getenv("YDB_DATABASE"),
-    credentials=ydb.AuthTokenCredentials(os.getenv('IAM_TOKEN')),
-    # credentials=ydb.iam.MetadataUrlCredentials(),
+    # credentials=ydb.AuthTokenCredentials(os.getenv('IAM_TOKEN')),
+    credentials=ydb.iam.MetadataUrlCredentials(),
 )
 
 driver.wait(fail_fast=True, timeout=50)
@@ -115,6 +115,8 @@ def create_book(text):
 def load_book(id):
     print('load_book:', id)
     res = execute(f"SELECT * FROM books WHERE id={id};")
+    if not res:
+        return {}
     book = res[0]
     book["chapters"] = execute(f"SELECT * FROM chapters WHERE book_id={id};")
     return book

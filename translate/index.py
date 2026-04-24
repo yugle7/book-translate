@@ -6,6 +6,8 @@ import db
 
 import dotenv
 
+from utils import ids_to_str
+
 dotenv.load_dotenv()
 
 
@@ -15,6 +17,7 @@ The text contains many clues: obvious clues, not-so-obvious clues, truly obscure
 The pacing of the story is that of serial fiction, i.e., that of a TV show running for a predetermined number of seasons, whose episodes are individually plotted but with an overall arc building to a final conclusion.
 All science mentioned is real science. But please keep in mind that, beyond the realm of science, the views of the characters may not be those of the author. Not everything the protagonist does is a lesson in wisdom, and advice offered by darker characters may be untrustworthy or dangerously double-edged.
 '''
+
 
 def get_text(event):
     body = event.get("body")
@@ -94,7 +97,7 @@ def handler(event, context):
     return {
         "statusCode": 200,
         "headers": {"content-type": "application/json"},
-        "body": json.dumps(res)
+        "body": json.dumps(ids_to_str(res))
     }
 
 

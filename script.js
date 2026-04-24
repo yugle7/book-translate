@@ -116,10 +116,10 @@ const toChapterPage = async (e = null) => {
 
     await loadChapter();
 
-    chapter.translates.forEach(t => {
-        addParagraph(t.ru, t.id)
+    chapter.paragraphs.forEach(p => {
+        addParagraph(p.ru, p.id)
         addGutter();
-        addParagraph(t.en)
+        addParagraph(p.en)
     });
 }
 
@@ -151,7 +151,9 @@ const toBookPage = async (e = null) => {
     settings.rules.value = book.rules;
     settings.rules.style.height = settings.rules.scrollHeight + "px";
 
-    settings.words.value = Object.entries(book.words).map(([en, ru]) => `${en} - ${ru}`).join('\n');
+    if (book.words) {
+        settings.words.value = Object.entries(book.words).map(([en, ru]) => `${en} - ${ru}`).join('\n');
+    }
     settings.words.style.height = settings.words.scrollHeight + "px";
 }
 
@@ -328,7 +330,7 @@ const loadChapter = async () => {
     url.searchParams.set("chapter_id", chapter.id)
     const response = await fetch(url);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    chapter = await response.json();
+    chapter.paragraphs = await response.json();
 }
 
 

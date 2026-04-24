@@ -99,3 +99,21 @@ def parse(text):
         })
 
     return book, chapters, paragraphs
+
+
+from typing import Any, Union, List, Dict
+
+
+def ids_to_str(src: Any) -> Any:
+    if isinstance(src, dict):
+        dst = {}
+        for key, value in src.items():
+            if key == 'id' or key.endswith('_id'):
+                dst[key] = str(value)
+            else:
+                dst[key] = ids_to_str(value)
+        return dst
+    elif isinstance(src, list):
+        return [ids_to_str(q) for q in src]
+
+    return src
