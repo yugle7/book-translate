@@ -272,7 +272,9 @@ li::before {
     font-size: 0.85em;
     font-weight: normal;
     display: inline-block;
-    width: 1.5em;
+    text-align: right;
+    width: 2.5rem;
+    padding-right: 0.5rem;
+    margin-left: -0.5rem;
 }
-
 
