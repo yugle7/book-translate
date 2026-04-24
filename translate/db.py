@@ -177,4 +177,10 @@ def update_book(data):
 
 
 def update_paragraph(data):
-    return {}
+    chapter_id = data['chapter_id']
+    i = data['i']
+
+    return execute(f'''
+        DECLARE $ru AS Utf8;
+        UPDATE paragraphs SET ru=$ru WHERE chapter_id={chapter_id} and i={i};
+    ''', {"$ru": data['ru']})

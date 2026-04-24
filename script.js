@@ -75,8 +75,12 @@ const addBook = ({id, title}) => {
 const addParagraph = (text, i) => {
     const p = document.createElement("p");
     p.textContent = text;
-    if (text && text[0] === '#') {
-        p.classList.add("header");
+    if (text) {
+        if (text[0] === '#') p.classList.add("header");
+        if (i != null) {
+            p.oninput = inputRu;
+            p.onblur = blurRu
+        }
     }
 
     if (i == null) {
@@ -85,7 +89,6 @@ const addParagraph = (text, i) => {
         p.id = i;
         p.classList.add('left');
         p.onclick = handleParagraphClick;
-
     }
     chapterPage.appendChild(p);
 }
@@ -538,3 +541,22 @@ title.addEventListener('blur', async () => {
     }
 });
 
+const inputRu = (e) => {
+    const p = e.currentTarget;
+
+    inputAutoSave({
+        chapter_id: chapter.id,
+        i: p.id,
+        ru: p.innerText
+    });
+};
+
+const blurRu = async (e) => {
+    const p = e.currentTarget;
+
+    await blurAutoSave({
+        chapter_id: chapter.id,
+        i: p.id,
+        ru: p.innerText
+    });
+};
