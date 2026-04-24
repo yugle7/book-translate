@@ -1,24 +1,23 @@
 :root {
-  --bg-primary: #222;
-  --bg-secondary: #444;
-  --bg-tertiary: #555;
-  --bg-editable: #222822;
-  --bg-hover: #262626;
-  --text-primary: #bbb;
-  --text-white: #fff;
-  --accent: #3fa883;
-  --accent-hover: #318b5b;
+    --bg-primary: #222;
+    --bg-secondary: #444;
+    --bg-tertiary: #555;
+    --bg-editable: #222822;
+    --bg-hover: #262626;
+    --text-primary: #bbb;
+    --text-white: #fff;
+    --accent: #3fa883;
+    --accent-hover: #318b5b;
 }
 
 * {
-  padding: 0;
-  margin: 0;
-  border: none;
-  line-height: 1.5;
-  font-weight: 400;
-  font-size: 20px;
-  font-family:
-    monospace,
+    padding: 0;
+    margin: 0;
+    border: none;
+    line-height: 1.5;
+    font-weight: 400;
+    font-size: 20px;
+    font-family: monospace,
     system-ui,
     -apple-system,
     BlinkMacSystemFont,
@@ -30,161 +29,215 @@
     "Open Sans Mono",
     "Helvetica Neue",
     sans-serif;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
 }
 
 *,
 *::before,
 *::after {
-  box-sizing: border-box;
+    box-sizing: border-box;
 }
 
-.download-screen {
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  padding: 50px 20px;
-  max-width: 700px;
+#main-page {
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 50px 20px;
+    max-width: 700px;
 }
 
-a {
-  cursor: pointer;
+a, li {
+    cursor: pointer;
 }
 
+li:hover,
 a:hover {
-  opacity: 0.8;
+    opacity: 0.8;
 }
 
 .hidden {
-  display: none !important;
+    display: none !important;
 }
 
-.grid {
-  display: grid;
-  grid-template-rows: auto auto auto;
-  grid-template-columns: 1fr 5px 1fr;
-  min-height: 100vh;
+
+#book-page,
+#chapter-page {
+    display: grid;
+    grid-template-rows: auto;
+    grid-template-columns: 1fr 5px 1fr;
+    min-height: 100vh;
 }
+
 
 .title {
-  text-align: center;
-  font-size: 32px;
-  color: var(--accent);
-  line-height: 3;
+    text-align: center;
+    font-size: 32px;
+    color: var(--accent);
+    line-height: 3;
 }
 
 .header {
-  color: var(--text-white);
+    color: var(--text-white);
 }
 
-.grid p {
-  user-select: text;
-  padding: 20px;
-  cursor: text;
-  outline: none;
+#chapter-page p {
+    user-select: text;
+    padding: 20px;
+    outline: none;
 }
 
-p:empty {
-  cursor: pointer;
+#chapters{
+    padding: 20px;
 }
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+}
+
+textarea {
+    width: 100%;
+    border: none;
+    outline: none;
+    resize: none;
+    overflow: hidden;
+}
+
 
 .left {
-  background: var(--bg-primary);
+    background: var(--bg-primary);
 }
 
 .right {
-  background: var(--bg-primary);
+    background: var(--bg-primary);
 }
 
-.grid div {
-  background: var(--bg-secondary);
-  cursor: col-resize;
-  transition: background 0.2s;
+
+#book-page div,
+#chapter-page div {
+    background: var(--bg-secondary);
+    cursor: col-resize;
+    transition: background 0.2s;
 }
 
-.grid div:hover {
-  background: var(--bg-tertiary);
+#chapter-page div:hover {
+    background: var(--bg-tertiary);
 }
 
-.grid div.dragging {
-  background: var(--bg-tertiary);
+#chapter-page div.dragging {
+    background: var(--bg-tertiary);
 }
 
-.grid p.editable {
-  background: var(--bg-editable);
+#chapter-page p.editable {
+    background: var(--bg-editable);
 }
 
 .upload-btn {
-  padding: 16px 32px;
-  font-size: 1.1rem;
-  background: var(--accent);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.save-btn,
-.back-btn {
-  position: fixed;
-  font-family: system-ui;
-  font-size: 32px;
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: var(--accent);
-  color: var(--text-white);
-  border: none;
-  cursor: pointer;
-  display: flex;
-  text-align: center;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.8;
-  transition: all 0.3s;
-  z-index: 1000;
-}
-
-.upload-btn,
-.save-btn {
-  bottom: 20px;
-  right: 20px;
-}
-
-.back-btn {
-  top: 20px;
-  left: 20px;
+    padding: 16px 32px;
+    font-size: 1.1rem;
+    background: var(--accent);
+    color: var(--text-white);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
 }
 
 .upload-btn:hover {
-  background: var(--accent-hover);
-  transform: scale(1.01);
+    background: var(--accent-hover);
+    transform: scale(1.01);
 }
 
-.save-btn:hover,
-.back-btn:hover {
-  background: var(--accent-hover);
-  transform: scale(1.1);
+.round-btn {
+    position: fixed;
+    font-family: system-ui;
+    font-size: 32px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--text-white);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.8;
+    transition: all 0.3s;
+    z-index: 1000;
 }
 
-.save-btn:active,
-.back-btn:active {
-  transform: scale(0.95);
+
+#to-main,
+#to-book {
+    top: 20px;
+    left: 20px;
+}
+
+
+.round-btn:hover {
+    background: var(--accent-hover);
+    transform: scale(1.1);
+}
+
+.round-btn:active {
+    transform: scale(0.95);
 }
 
 p:nth-child(1 of .left:empty)::before {
-  content: "Нажать чтобы перевести";
-  opacity: 0.3;
+    content: "Нажать чтобы перевести";
+    opacity: 0.3;
 }
 
 p:empty:hover {
-  background: var(--bg-hover);
+    background: var(--bg-hover);
+}
+
+p:empty {
+    cursor: pointer;
 }
 
 p:empty:hover::before {
-  content: "...";
-  opacity: 0.3;
+    content: "...";
+    opacity: 0.3;
 }
+
+select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+input,
+select {
+    width: 100%;
+    outline: none;
+    vertical-align: middle;
+}
+
+
+ol {
+    list-style: none;
+    counter-reset: item;
+    padding-left: 0;
+}
+
+li {
+    counter-increment: item;
+    margin-top: 12px;
+}
+
+li::before {
+    content: counter(item) " ";
+    color: var(--accent-hover);
+    font-size: 0.85em;
+    font-weight: normal;
+    display: inline-block;
+    width: 1.5em;
+}
+

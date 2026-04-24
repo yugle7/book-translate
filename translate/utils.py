@@ -2,6 +2,7 @@ import os
 import re
 
 import requests
+from random import getrandbits
 
 import dotenv
 
@@ -59,3 +60,42 @@ def translate(t) -> bool:
         q['ru'] = r['text']
 
     return True
+
+
+def get_id():
+    return getrandbits(64)
+
+
+def parse(text):
+    texts = re.split(r"\s*\n+\s*", text)
+    texts = [t for t in texts if t]
+
+    chapter_id = get_id()
+    book_id = get_id()
+    chapters = []
+    paragraphs = []
+
+    book = {"id": book_id}
+
+    for i, en in enumerate(texts):
+        if en.startswith('# '):
+            chapter_id = get_id()
+            chapters.append({
+                "id": chapter_id,
+                "book_id": book_id,
+                "title": en.removeprefix('# ').strip()
+            })
+        elif not chapters:
+            chapters.append({
+                "id": chapter_id,
+                "book_id": book_id,
+                "title": en.strip('#').strip()
+            })
+        paragraphs.append({
+            "book_id": book_id,
+            "chapter_id": chapter_id,
+            "i": i,
+            "en": en
+        })
+
+    return book, chapters, paragraphs

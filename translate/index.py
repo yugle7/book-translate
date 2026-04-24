@@ -9,6 +9,13 @@ import dotenv
 dotenv.load_dotenv()
 
 
+def _get_text(event):
+    return '''# Preface
+The text contains many clues: obvious clues, not-so-obvious clues, truly obscure hints which I was shocked to see some readers successfully decode, and massive evidence left out in plain sight. This is a rationalist story; its mysteries are solvable, and meant to be solved.
+The pacing of the story is that of serial fiction, i.e., that of a TV show running for a predetermined number of seasons, whose episodes are individually plotted but with an overall arc building to a final conclusion.
+All science mentioned is real science. But please keep in mind that, beyond the realm of science, the views of the characters may not be those of the author. Not everything the protagonist does is a lesson in wisdom, and advice offered by darker characters may be untrustworthy or dangerously double-edged.
+'''
+
 def get_text(event):
     body = event.get("body")
     if not body:
@@ -42,30 +49,48 @@ def get_text(event):
         return ""
 
 
-
 def handler(event, context):
     print(event)
-    params = event["queryStringParameters"] or {}
 
-    b = params.get("b")
-    i = params.get("i")
-    text = get_text(event)
+    method = event['httpMethod']
 
-    if b:
-        b = int(b)
-        if b < 0:
-            res = db.delete_book(abs(b))
-        elif i:
-            res = db.translate_book(b, int(i))
-        elif text:
-            res = db.edit_book(b, text)
-        else:
-            res = db.load_book(b)
-    elif text:
+    if method == 'POST':
+        text = _get_text(event)
         res = db.create_book(text)
-    else:
-        res = db.get_books()
 
+    elif method == 'GET':
+        params = event["queryStringParameters"] or {}
+
+        book_id = params.get("book_id")
+        chapter_id = params.get("chapter_id")
+
+        if book_id:
+            book_id = int(book_id)
+            if book_id > 0:
+                res = db.load_book(book_id)
+            else:
+                res = db.delete_book(abs(book_id))
+        elif chapter_id:
+            chapter_id = int(chapter_id)
+            i = params.get("i")
+            if i:
+                i = int(i)
+                ru = params.get("ru")
+
+                if ru:
+                    res = db.set_translate(chapter_id, i, ru)
+                else:
+                    res = db.get_translate(chapter_id, i)
+            else:
+                res = db.load_chapter(chapter_id)
+        else:
+            res = db.get_books()
+
+    else:
+        print("method:", method)
+        res = {}
+
+    print(res)
     return {
         "statusCode": 200,
         "headers": {"content-type": "application/json"},
@@ -78,8 +103,9 @@ if __name__ == '__main__':
         # 'httpMethod': 'POST',
         'httpMethod': 'GET',
         # 'queryStringParameters': {'b': -4},
-        'queryStringParameters': {'b': 27, 'i': 82},
+        # 'queryStringParameters': {'b': 27, 'i': 82},
         # 'queryStringParameters': {},
-        # 'body': base64.b64encode('text'.encode('utf-8')),
-        # 'isBase64Encoded': True
+        # 'queryStringParameters': {'book_id': 489898406972149379},
+        # 'queryStringParameters': {'chapter_id': 2202934346076896777},
+        'queryStringParameters': {'chapter_id': 2202934346076896777, "i": "0", "ru": "s"},
     }, None))

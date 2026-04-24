@@ -2,3 +2,4 @@ ydb
 dotenv
 cityhash
 requests
+python-dotenv

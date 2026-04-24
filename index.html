@@ -7,20 +7,45 @@
     <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-<div id="downloadScreen" class="download-screen">
-    <input type="file" id="fileInput" accept=".md,.txt" hidden/>
-    <button id="uploadBtn" class="upload-btn">Загрузить книгу</button>
-    <br>
+<div id="main-page">
+    <input type="file" id="file-input" accept=".md,.txt" hidden/>
+    <button id="upload-btn" class="upload-btn">Загрузить книгу</button>
+    <ol id="books"></ol>
 </div>
 
-<div class="grid hidden" id="resizableGrid">
+<div id="book-page" class="hidden">
+    <article>
+        <h1 id="title" class="title"></h1>
+        <ol id="chapters"></ol>
+    </article>
+    <div id="gutter"></div>
+    <form>
+        <label>
+            <select name="model">
+                <option value="gpt4">GPT-4 Turbo</option>
+                <option value="gpt3.5">GPT-3.5 Turbo</option>
+                <option value="claude3">Claude 3 Opus</option>
+            </select>
+        </label>
+        <label>
+            <textarea id="rules" name="rules" placeholder="Правила" rows="3"></textarea>
+        </label>
+        <label>
+            <textarea id="words" name="words" placeholder="Словарь" rows="3"></textarea>
+        </label>
+    </form>
+    <button id="to-main" class="round-btn" title="Вернуться к загрузке">
+        ←
+    </button>
+</div>
+
+<div id="chapter-page" class="hidden">
     <span class="title">Перевод</span>
     <div></div>
     <span class="title">Original</span>
-    <button id="backBtn" class="back-btn" title="Вернуться к загрузке">
+    <button id="to-book" class="round-btn" title="Вернуться к оглавлению">
         ←
     </button>
-    <button id="saveBtn" class="save-btn" title="Сохранить перевод">↓</button>
 </div>
 
 <script src="script.js"></script>

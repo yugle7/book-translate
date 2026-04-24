@@ -1,16 +1,13 @@
-from time import sleep
-
 import ydb
 import ydb.iam
-import re
 
 import os
 
-from utils import translate, get_title, get_ij
+from utils import translate, parse
 
-import dotenv
+from dotenv import load_dotenv
 
-dotenv.load_dotenv()
+load_dotenv()
 
 driver = ydb.Driver(
     endpoint=os.getenv("YDB_ENDPOINT"),
@@ -24,6 +21,30 @@ driver.wait(fail_fast=True, timeout=50)
 pool = ydb.SessionPool(driver)
 
 settings = ydb.BaseRequestSettings().with_timeout(30).with_operation_timeout(20)
+
+
+def get_insert(schema, table):
+    keys = list(schema.keys())
+    schema = ', '.join(f'{k}:{schema[k]}' for k in keys)
+    keys = ', '.join(keys)
+    return f'''
+        DECLARE $inserts AS List<Struct<{schema}>>;
+        INSERT INTO {table} ({keys})
+        SELECT {keys}
+        FROM AS_TABLE($inserts) AS table
+    '''
+
+
+def get_update(schema, table):
+    keys = list(schema.keys())
+    schema = ', '.join(f'{k}:{schema[k]}' for k in keys)
+    keys = ', '.join(keys)
+    return f'''
+        DECLARE $updates AS List<Struct<{schema}>>;
+        UPDATE {table} ON
+        SELECT {keys} 
+        FROM AS_TABLE($updates) AS table;
+    '''
 
 
 def execute(yql, params=None):
@@ -54,70 +75,73 @@ def execute(yql, params=None):
 
 def get_books():
     print('get_books')
-    return execute("SELECT id, title FROM rules;")
+    return execute("SELECT id, title FROM books;")
 
 
-def delete_book(b):
-    print('delete_book:', b)
-    execute(f"DELETE FROM translates WHERE b=={b};")
-    return execute(f"DELETE FROM rules WHERE id=={b};")
+def delete_book(id):
+    print('delete_book:', id)
+    execute(f"DELETE FROM paragraphs WHERE book_id={id};")
+    execute(f"DELETE FROM chapters WHERE book_id={id};")
+    execute(f"DELETE FROM books WHERE id={id};")
+
+    return {"deleted": True}
 
 
 def create_book(text):
     print('create_book:', len(text))
-    texts = re.split(r"\s*\n+\s*", text)
-    texts = [t for t in texts if t]
+    book, chapters, paragraphs = parse(text)
 
-    title = get_title(texts[0])
-    res = execute(f'INSERT INTO rules (title) VALUES ("{title}") RETURNING id;')
-    b = res[0]["id"]
+    execute(f'INSERT INTO books (id) VALUES ({book["id"]});')
 
-    query = '''
-        DECLARE $data AS List<Struct<b:Uint64, i:Uint32, en:Utf8>>;
-        INSERT INTO translates (b, i, en)
-        SELECT b, i, en FROM AS_TABLE($data) AS d
-    '''
-    execute(query, {'$data': [
-        {'b': b, 'i': i, 'en': en}
-        for i, en in enumerate(texts)
-    ]})
-    return {'b': b}
+    schema = {
+        'id': 'Uint64',
+        'book_id': 'Uint64',
+        'title': 'Utf8'
+    }
+    query = get_insert(schema, 'chapters')
+    execute(query, {"$inserts": chapters})
+    schema = {
+        'book_id': 'Uint64',
+        'chapter_id': 'Uint64',
+        'i': 'Uint32',
+        'en': 'Utf8'
+    }
+    query = get_insert(schema, 'paragraphs')
+    execute(query, {"$inserts": paragraphs})
 
-
-def load_book(b):
-    print('load_book:', b)
-    return execute(f"SELECT ru, en FROM translates WHERE b=={b} and i < 100 ORDER BY i;")
-
-
-def edit_book(b, text):
-    print('edit_book:', b)
-    book = execute(f"SELECT ru, en FROM translates WHERE b=={b} ORDER BY i;")
-    for i, ru in enumerate(text.split("\n")):
-        book[i]["ru"] = ru
-    execute(f"DELETE FROM translates WHERE b={b};")
-    query = '''
-        DECLARE $data AS List<Struct<b:Uint64, i:Uint32, ru:Utf8, en:Utf8>>;
-        INSERT INTO translates (b, i, ru, en)
-        SELECT b, i, ru, en FROM AS_TABLE($data) AS d
-    '''
-    return execute(query, {'$data': [
-        {'b': b, 'i': i, 'ru': q['ru'], 'en': q['en']}
-        for i, q in enumerate(book)
-    ]})
+    return book
 
 
-def translate_book(b, i, d=5):
-    print('translate_book:', b, i)
+def load_book(id):
+    print('load_book:', id)
+    res = execute(f"SELECT * FROM books WHERE id={id};")
+    book = res[0]
+    book["chapters"] = execute(f"SELECT * FROM chapters WHERE book_id={id};")
+    return book
 
-    t = execute(f"SELECT id, i, en FROM translates WHERE b=={b} and i>={i - d} and i<={i + d} and ru is null;")
-    if not t or not translate(t):
+
+def load_chapter(id):
+    print('load_chapter:', id)
+    return execute(f"SELECT i, ru, en FROM paragraphs WHERE chapter_id={id};")
+
+
+def set_translate(chapter_id, i, ru):
+    return {}
+
+
+def get_translate(chapter_id, i, d=5):
+    print('get_translate:', chapter_id, i)
+
+    paragraphs = execute(f"SELECT id, i, en FROM paragraphs WHERE chapter_id={chapter_id} and i>={i - d} and i<={i + d} and ru is null;")
+    if not paragraphs or not translate(paragraphs):
         return {}
 
-    query = '''
-        DECLARE $updates AS List<Struct<id: Int64, ru: Utf8>>;
-        UPDATE translates ON
-        SELECT id, ru
-        FROM AS_TABLE($updates) AS u;
-    '''
-    execute(query, {'$updates': [{'id': q['id'], 'ru': q['ru']} for q in t]})
-    return {q['i']: q["ru"] for q in t}
+    schema = {
+        "id": "Int64",
+        "ru": "Utf8"
+    }
+    query = get_update(schema, "paragraphs")
+    updates = [{'id': q['id'], 'ru': q['ru']} for q in paragraphs]
+    execute(query, {'$updates': updates})
+
+    return {q['i']: q["ru"] for q in paragraphs}
