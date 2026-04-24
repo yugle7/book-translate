@@ -54,16 +54,27 @@ def translate(t) -> bool:
     return True
 
 
-def get_id():
-    return getrandbits(64)
+def id_getter():
+    from time import time_ns
+    i = time_ns()
+
+    def get():
+        nonlocal i
+        i += 1
+        return i
+
+    return get
+
+get_id = id_getter()
 
 
 def parse(text):
     texts = re.split(r"\s*\n+\s*", text)
     texts = [t for t in texts if t]
 
-    chapter_id = get_id()
     book_id = get_id()
+    chapter_id = get_id()
+
     chapters = []
     paragraphs = []
 

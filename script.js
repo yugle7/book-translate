@@ -517,8 +517,8 @@ const blurAutoSave = async (update) => {
 }
 
 title.addEventListener('input', async () => {
-    if (book.title !== title.innerText) {
-        document.getElementById(book.id).innerText = book.title = title.innerText;
+    if (book.title !== title.innerText.trim()) {
+        document.getElementById(book.id).innerText = book.title = title.innerText.trim();
 
         inputAutoSave({
             book_id: book.id,
@@ -528,8 +528,8 @@ title.addEventListener('input', async () => {
 });
 
 title.addEventListener('blur', async () => {
-    if (book.title !== title.innerText) {
-        document.getElementById(book.id).innerText = book.title = title.innerText;
+    if (book.title !== title.innerText.trim()) {
+        document.getElementById(book.id).innerText = book.title = title.innerText.trim();
 
         await blurAutoSave({
             book_id: book.id,
