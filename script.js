@@ -1,4 +1,4 @@
-const api = "https://d5ds1trsppqs2rog97qd.cmxivbes.apigw.yandexcloud.net";
+const API_ENDPOINT = "https://d5ds1trsppqs2rog97qd.cmxivbes.apigw.yandexcloud.net";
 
 const mainPage = document.getElementById("main-page");
 const bookPage = document.getElementById("book-page");
@@ -39,19 +39,17 @@ let startLeftWith = 0;
 let clickTimeout = null;
 
 const minWidth = 150;
-console.log('window.innerWidth:', window.innerWidth)
 const maxWidth = window.innerWidth - 150;
 
 // добавление элементов
 
 const addTranslates = async () => {
-    console.log('addTranslates()');
+    console.log('addTranslates');
 
     if (paragraph.textContent || isTranslating || chapter.id == null) return;
     isTranslating = true;
 
     const translates = await getTranslates();
-    console.log('translates:', translates)
     for (const [i, ru] of Object.entries(translates)) {
         const p = document.getElementById(i);
         p.textContent = ru;
@@ -66,7 +64,9 @@ const addTranslates = async () => {
 
 const addBook = ({id, title}) => {
     const book = document.createElement('li')
-    book.innerText = title;
+    if (title) {
+        book.innerText = title;
+    }
     book.id = id;
     book.onclick = toBookPage;
     books.appendChild(book);
@@ -117,9 +117,8 @@ const toChapterPage = async (e = null) => {
     chapterPage.classList.remove("hidden");
 
     await loadChapter();
-
     chapter.paragraphs.forEach(p => {
-        addParagraph(p.ru, p.id)
+        addParagraph(p.ru, p.i)
         addGutter();
         addParagraph(p.en)
     });
@@ -138,7 +137,7 @@ const toBookPage = async (e = null) => {
     chapterPage.classList.add("hidden");
 
     await loadBook();
-    title.innerText = book.title;
+    title.innerText = book.title || '';
 
     chapters.replaceChildren(
         ...book.chapters.map((c, i) => {
@@ -150,7 +149,7 @@ const toBookPage = async (e = null) => {
         })
     );
     settings.model.value = book.model;
-    settings.rules.value = book.rules;
+    settings.rules.value = book.rules || '';
     settings.rules.style.height = settings.rules.scrollHeight + "px";
 
     if (book.words) {
@@ -224,14 +223,16 @@ const handleParagraphClick = async (e) => {
     if (isDragging) return;
     e.preventDefault();
 
-    if (e.target.tagName !== "P") return;
-    if (e.target.classList.contains("editable")) return;
+    const p = e.currentTarget;
+    console.log('handleParagraphClick:', p.id)
+
+    if (p.classList.contains("editable")) return;
     if (paragraph) {
         paragraph.classList.remove("editable");
         paragraph.contentEditable = false;
         paragraph.onkeydown = null;
     }
-    paragraph = e.target;
+    paragraph = p;
     await addTranslates();
     paragraph.onkeydown = handleKeydown;
     makeEditable(paragraph, e.clientX, e.clientY);
@@ -245,7 +246,6 @@ function handleMouseDown(e) {
     document.body.style.cursor = "col-resize";
     startX = e.clientX;
     startLeftWith = page.firstElementChild.getBoundingClientRect().width;
-    console.log('startLeftWith:', startLeftWith)
     e.preventDefault();
 }
 
@@ -322,9 +322,9 @@ words.addEventListener("input", resize);
 // отправка и получение данных
 
 const loadBook = async () => {
-    console.log('loadBook()', book.id);
+    console.log('loadBook:', book.id);
 
-    const url = new URL(api);
+    const url = new URL(API_ENDPOINT);
     url.searchParams.set("book_id", book.id)
     const response = await fetch(url);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -333,9 +333,9 @@ const loadBook = async () => {
 
 
 const loadChapter = async () => {
-    console.log('loadChapter()', chapter.id);
+    console.log('loadChapter:', chapter.id);
 
-    const url = new URL(api);
+    const url = new URL(API_ENDPOINT);
     url.searchParams.set("chapter_id", chapter.id)
     const response = await fetch(url);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -344,15 +344,15 @@ const loadChapter = async () => {
 
 
 const getBooks = async () => {
-    console.log('getBooks()')
-    const response = await fetch(api);
+    console.log('getBooks')
+    const response = await fetch(API_ENDPOINT);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return await response.json();
 };
 
 const createBook = async (text) => {
-    console.log('createBook(text)');
-    const url = new URL(api);
+    console.log('createBook:', text.slice(0, 16));
+    const url = new URL(API_ENDPOINT);
 
     const textBlob = new Blob([text], {type: 'text/plain; charset=utf-8'});
     const compressedStream = textBlob.stream().pipeThrough(new CompressionStream('gzip'));
@@ -368,13 +368,14 @@ const createBook = async (text) => {
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     book = await response.json();
+    addBook(book);
 };
 
 
 const getTranslates = async () => {
     console.log('getTranslates:', paragraph.id)
 
-    const url = new URL(api);
+    const url = new URL(API_ENDPOINT);
     url.searchParams.set("i", paragraph.id);
     url.searchParams.set("chapter_id", chapter.id);
 
@@ -395,7 +396,7 @@ getBooks()
 // заглушки для сервера
 
 const _loadChapter = async () => {
-    console.log('loadChapter()', chapter.id);
+    console.log('loadChapter:', chapter.id);
     chapter = {
         id: chapter.id,
         translates: [
@@ -409,7 +410,7 @@ const _loadChapter = async () => {
 }
 
 const _createBook = async (text) => {
-    console.log('createBook(text)');
+    console.log('createBook:', text.slice(0, 16));
     book = {
         id: 3,
         title: "new book"
@@ -421,7 +422,7 @@ const _getTranslates = async () => {
 }
 
 const _getBooks = async () => {
-    console.log('getBooks()')
+    console.log('getBooks:')
     return [{id: 1, title: 'first book'}, {id: 2, title: 'second book'}]
 };
 
@@ -451,4 +452,89 @@ function checkScroll() {
 }
 
 window.addEventListener('scroll', checkScroll);
+
+// автосохранение
+
+const SAVE_DELAY_MS = 800;
+
+let saveTimeout = null;
+let abortController = null;
+
+
+async function saveToServer(update) {
+    if (abortController) abortController.abort();
+    console.log('saveToServer:', update);
+
+    abortController = new AbortController();
+    const signal = abortController.signal;
+
+    try {
+        const response = await fetch(API_ENDPOINT, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(update)
+        });
+
+        if (!response.ok) {
+            console.error(`saveToServer: HTTP ${response.status}`);
+            return false;
+        }
+
+        const data = await response.json();
+        console.log('saveToServer:', data);
+        return true;
+
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            console.log('saveToServer cancelled');
+            return false;
+        }
+        console.error('saveToServer:', error);
+        return false;
+
+    } finally {
+        if (abortController && abortController.signal === signal) {
+            abortController = null;
+        }
+    }
+}
+
+const inputAutoSave = (update) => {
+    if (saveTimeout) clearTimeout(saveTimeout);
+
+    saveTimeout = setTimeout(async () => {
+        await saveToServer(update);
+        saveTimeout = null;
+    }, SAVE_DELAY_MS);
+}
+
+const blurAutoSave = async (update) => {
+    if (saveTimeout) {
+        clearTimeout(saveTimeout);
+        saveTimeout = null;
+    }
+    await saveToServer(update);
+}
+
+title.addEventListener('input', async () => {
+    if (book.title !== title.innerText) {
+        document.getElementById(book.id).innerText = book.title = title.innerText;
+
+        inputAutoSave({
+            book_id: book.id,
+            title: book.title
+        });
+    }
+});
+
+title.addEventListener('blur', async () => {
+    if (book.title !== title.innerText) {
+        document.getElementById(book.id).innerText = book.title = title.innerText;
+
+        await blurAutoSave({
+            book_id: book.id,
+            title: book.title
+        });
+    }
+});
 

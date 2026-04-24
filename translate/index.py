@@ -19,6 +19,11 @@ All science mentioned is real science. But please keep in mind that, beyond the 
 '''
 
 
+def get_data(event) -> dict:
+    body = event.get("body")
+    return json.loads(body) if body else {}
+
+
 def get_text(event):
     body = event.get("body")
     if not body:
@@ -28,25 +33,21 @@ def get_text(event):
 
     # 1. Декодируем base64, если нужно
     try:
-        raw_data = base64.b64decode(body) if is_base64 else body.encode()
+        text = base64.b64decode(body) if is_base64 else body.encode()
     except Exception as e:
         print(e)
         return ""
 
     # 2. Проверяем заголовок Content-Encoding
-    headers = event.get("headers", {})
-    content_encoding = headers.get("content-encoding") or headers.get("Content-Encoding", "")
-
-    if "gzip" in content_encoding:
-        try:
-            raw_data = gzip.decompress(raw_data)
-        except gzip.BadGzipFile as e:
-            print(e)
-            return ""
+    try:
+        text = gzip.decompress(text)
+    except gzip.BadGzipFile as e:
+        print(e)
+        return ""
 
     # 3. Декодируем текст
     try:
-        return raw_data.decode("utf-8")
+        return text.decode("utf-8")
     except UnicodeDecodeError as e:
         print(e)
         return ""
@@ -56,34 +57,43 @@ def handler(event, context):
     print(event)
 
     method = event['httpMethod']
+    res = {}
 
     if method == 'POST':
-        text = _get_text(event)
-        res = db.create_book(text)
+        headers = event.get("headers", {})
+        content_type = headers.get("Content-Type")
+
+        if 'text/plain' in content_type:
+            text = get_text(event)
+            res = db.create_book(text)
+
+        elif 'application/json' in content_type:
+            data = get_data(event)
+
+            book_id = data.get('book_id')
+            chapter_id = data.get('chapter_id')
+
+            if book_id:
+                res = db.update_book(data)
+            elif chapter_id:
+                res = db.update_paragraph(data)
 
     elif method == 'GET':
-        params = event["queryStringParameters"] or {}
+        params = event.get("queryStringParameters", {})
 
         book_id = params.get("book_id")
         chapter_id = params.get("chapter_id")
 
-        if book_id:
-            book_id = int(book_id)
-            if book_id > 0:
-                res = db.load_book(book_id)
+        if isinstance(book_id, str):
+            if book_id.startswith('-'):
+                res = db.delete_book(book_id.removeprefix('-'))
             else:
-                res = db.delete_book(abs(book_id))
-        elif chapter_id:
-            chapter_id = int(chapter_id)
+                res = db.load_book(book_id)
+
+        elif isinstance(chapter_id, str):
             i = params.get("i")
             if i:
-                i = int(i)
-                ru = params.get("ru")
-
-                if ru:
-                    res = db.set_translate(chapter_id, i, ru)
-                else:
-                    res = db.get_translate(chapter_id, i)
+                res = db.get_translate(chapter_id, int(i))
             else:
                 res = db.load_chapter(chapter_id)
         else:
@@ -91,7 +101,6 @@ def handler(event, context):
 
     else:
         print("method:", method)
-        res = {}
 
     print(res)
     return {
@@ -110,5 +119,5 @@ if __name__ == '__main__':
         # 'queryStringParameters': {},
         # 'queryStringParameters': {'book_id': 489898406972149379},
         # 'queryStringParameters': {'chapter_id': 2202934346076896777},
-        'queryStringParameters': {'chapter_id': 2202934346076896777, "i": "0", "ru": "s"},
+        # 'queryStringParameters': {'chapter_id': 2202934346076896777, "i": "0", "ru": "s"},
     }, None))

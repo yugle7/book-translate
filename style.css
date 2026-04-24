@@ -87,6 +87,7 @@ section {
 h1 {
     outline: none;
     border: none;
+    color: var(--accent);
     font-size: inherit;
 }
 

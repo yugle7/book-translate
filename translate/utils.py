@@ -23,14 +23,6 @@ payload = {
 }
 
 
-def get_ij(book, i, d=5):
-    k = max(0, i - d + 1)
-    while i > k and not book[i - 1]['ru']:
-        i -= 1
-    j = min(i + d, len(book))
-    return i, j
-
-
 def get_title(text: str) -> str:
     words = text.split()
     if len(words) > 16:
@@ -101,14 +93,11 @@ def parse(text):
     return book, chapters, paragraphs
 
 
-from typing import Any, Union, List, Dict
-
-
-def ids_to_str(src: Any) -> Any:
+def ids_to_str(src):
     if isinstance(src, dict):
         dst = {}
         for key, value in src.items():
-            if key == 'id' or key.endswith('_id'):
+            if isinstance(key, str) and (key == 'id' or key.endswith('_id')):
                 dst[key] = str(value)
             else:
                 dst[key] = ids_to_str(value)

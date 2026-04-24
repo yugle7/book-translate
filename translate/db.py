@@ -1,3 +1,5 @@
+import json
+
 import ydb
 import ydb.iam
 
@@ -91,7 +93,7 @@ def create_book(text):
     print('create_book:', len(text))
     book, chapters, paragraphs = parse(text)
 
-    execute(f'INSERT INTO books (id) VALUES ({book["id"]});')
+    execute(f'INSERT INTO books (id, model) VALUES ({book["id"]}, "gpt4");')
 
     schema = {
         'id': 'Uint64',
@@ -127,14 +129,10 @@ def load_chapter(id):
     return execute(f"SELECT i, ru, en FROM paragraphs WHERE chapter_id={id};")
 
 
-def set_translate(chapter_id, i, ru):
-    return {}
-
-
 def get_translate(chapter_id, i, d=5):
     print('get_translate:', chapter_id, i)
 
-    paragraphs = execute(f"SELECT id, i, en FROM paragraphs WHERE chapter_id={chapter_id} and i>={i - d} and i<={i + d} and ru is null;")
+    paragraphs = execute(f"SELECT id, i, en FROM paragraphs WHERE chapter_id={chapter_id} and i>={max(0, i - d)} and i<={i + d} and ru is null;")
     if not paragraphs or not translate(paragraphs):
         return {}
 
@@ -147,3 +145,36 @@ def get_translate(chapter_id, i, d=5):
     execute(query, {'$updates': updates})
 
     return {q['i']: q["ru"] for q in paragraphs}
+
+
+def update_book(data):
+    book_id = data['book_id']
+
+    if 'title' in data:
+        return execute(f'''
+            DECLARE $title AS Utf8;
+            UPDATE books SET title=$title WHERE id={book_id};
+        ''', {"$title": data['title']})
+
+    if 'model' in data:
+        return execute(f'UPDATE books SET model="{data['model']}" WHERE id={book_id}')
+
+    if 'rules' in data:
+        return execute(f'''
+            DECLARE $rules AS Utf8;
+            UPDATE books SET rules=$rules WHERE id={book_id};
+        ''', {"$rules": data['rules']})
+
+    if 'words' in data:
+        words = {}
+        for q in data['words'].split('\n'):
+            if q.count(' - ') == 1:
+                en, ru = q.split(' - ')
+                words[en] = ru
+        return execute(f"UPDATE books SET words='{json.dumps(words)}' WHERE id={book_id}")
+
+    return {}
+
+
+def update_paragraph(data):
+    return {}
