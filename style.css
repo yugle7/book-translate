@@ -72,11 +72,44 @@ a:hover {
 
 
 .title {
-    text-align: center;
+    padding: 20px;
     font-size: 32px;
     color: var(--accent);
-    line-height: 3;
 }
+
+section {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    wrap-after: flex;
+}
+
+h1 {
+    outline: none;
+    border: none;
+    font-size: inherit;
+}
+
+h1:empty::before {
+    content: "Название книги";
+    opacity: 0.5;
+    color: var(--text-primary);
+}
+
+#at-main,
+#at-book {
+    font-family: system-ui;
+    font-size: inherit;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+#at-main:hover,
+#at-book:hover {
+    transform: scale(1.1);
+    color: var(--text-white);
+}
+
 
 .header {
     color: var(--text-white);
@@ -88,7 +121,7 @@ a:hover {
     outline: none;
 }
 
-#chapters{
+#chapters {
     padding: 20px;
 }
 
@@ -240,4 +273,5 @@ li::before {
     display: inline-block;
     width: 1.5em;
 }
+
 

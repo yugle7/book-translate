@@ -8,6 +8,8 @@ const chapterPage = document.getElementById("chapter-page");
 
 const toMain = document.getElementById("to-main");
 const toBook = document.getElementById("to-book");
+const atMain = document.getElementById("at-main");
+const atBook = document.getElementById("at-book");
 
 const title = document.getElementById("title");
 const books = document.getElementById("books");
@@ -157,12 +159,6 @@ const toBookPage = async (e = null) => {
     settings.words.style.height = settings.words.scrollHeight + "px";
 }
 
-const toMainPage = async () => {
-    console.log('toMainPage');
-
-    mainPage.classList.remove("hidden");
-    bookPage.classList.add("hidden");
-}
 
 // редактирование
 
@@ -303,8 +299,21 @@ document.onmousemove = handleMouseMove;
 document.onmouseup = handleMouseUp;
 document.onmouseleave = handleMouseUp;
 
-toMain.onclick = toMainPage;
-toBook.onclick = toBookPage;
+atMain.onclick = toMain.onclick = () => {
+    console.log('toMainPage');
+
+    mainPage.classList.remove("hidden");
+    bookPage.classList.add("hidden");
+};
+
+atBook.onclick = toBook.onclick = () => {
+    page = bookPage;
+    console.log('backToBook');
+
+    bookPage.classList.remove("hidden");
+    chapterPage.classList.add("hidden");
+};
+
 chapterPage.querySelector('div').onmousedown = handleMouseDown;
 
 rules.addEventListener("input", resize);
@@ -426,3 +435,20 @@ const _loadBook = async () => {
     book.rules = 'правила';
     book.words = {'word': 'слово', 'excel': 'excel'}
 }
+
+// прокрутка
+
+function checkScroll() {
+    const scrollY = window.scrollY || document.documentElement.scrollTop;
+
+    if (scrollY > 50) {
+        toMain.classList.remove('hidden');
+        toBook.classList.remove('hidden');
+    } else {
+        toMain.classList.add('hidden');
+        toBook.classList.add('hidden');
+    }
+}
+
+window.addEventListener('scroll', checkScroll);
+

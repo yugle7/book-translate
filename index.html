@@ -15,7 +15,10 @@
 
 <div id="book-page" class="hidden">
     <article>
-        <h1 id="title" class="title"></h1>
+        <section class="title">
+            <button id="at-main">←</button>
+            <h1 id="title" contenteditable="true"></h1>
+        </section>
         <ol id="chapters"></ol>
     </article>
     <div id="gutter"></div>
@@ -34,16 +37,19 @@
             <textarea id="words" name="words" placeholder="Словарь" rows="3"></textarea>
         </label>
     </form>
-    <button id="to-main" class="round-btn" title="Вернуться к загрузке">
+    <button id="to-main" class="round-btn hidden" title="Вернуться к загрузке">
         ←
     </button>
 </div>
 
 <div id="chapter-page" class="hidden">
-    <span class="title">Перевод</span>
+    <span class="title">
+        <button id="at-book">←</button>
+        Перевод
+    </span>
     <div></div>
     <span class="title">Original</span>
-    <button id="to-book" class="round-btn" title="Вернуться к оглавлению">
+    <button id="to-book" class="round-btn hidden" title="Вернуться к оглавлению">
         ←
     </button>
 </div>
