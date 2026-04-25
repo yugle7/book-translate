@@ -157,6 +157,8 @@ const toBookPage = async (e = null) => {
 
     if (book.words) {
         settings.words.value = Object.entries(JSON.parse(book.words)).map(([en, ru]) => `${en} = ${ru}`).join('\n');
+    } else {
+        settings.words.value = "";
     }
     settings.words.style.height = settings.words.scrollHeight + "px";
 }
