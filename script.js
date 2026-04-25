@@ -449,11 +449,11 @@ function checkScroll() {
     const scrollY = window.scrollY || document.documentElement.scrollTop;
 
     if (scrollY > 50) {
-        toMain.classList.remove('hidden');
-        toBook.classList.remove('hidden');
+        toMain.classList.remove('hided');
+        toBook.classList.remove('hided');
     } else {
-        toMain.classList.add('hidden');
-        toBook.classList.add('hidden');
+        toMain.classList.add('hided');
+        toBook.classList.add('hided');
     }
 }
 

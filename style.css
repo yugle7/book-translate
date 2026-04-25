@@ -61,6 +61,10 @@ a:hover {
     display: none !important;
 }
 
+.hided {
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
 
 #book-page,
 #chapter-page {
@@ -203,7 +207,7 @@ textarea {
     align-items: center;
     justify-content: center;
     opacity: 0.8;
-    transition: all 0.3s;
+    transition: all 0.5s;
     z-index: 1000;
 }
 
