@@ -15,6 +15,7 @@ const title = document.getElementById("title");
 const books = document.getElementById("books");
 const chapters = document.getElementById("chapters");
 const settings = document.querySelector("form");
+const translation = document.getElementById("translation");
 
 const rules = document.getElementById("rules");
 const words = document.getElementById("words");
@@ -305,6 +306,11 @@ document.onmousemove = handleMouseMove;
 document.onmouseup = handleMouseUp;
 document.onmouseleave = handleMouseUp;
 
+translation.onclick = async () => {
+    const res = await getTranslation()
+    if (res) window.open(res['link'], '_blank');
+}
+
 atMain.onclick = toMain.onclick = () => {
     console.log('toMainPage');
 
@@ -384,6 +390,18 @@ const getTranslates = async () => {
     const url = new URL(API_ENDPOINT);
     url.searchParams.set("i", paragraph.id);
     url.searchParams.set("chapter_id", chapter.id);
+
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    return await response.json();
+};
+
+const getTranslation = async () => {
+    console.log('getTranslation:', book.id)
+
+    const url = new URL(API_ENDPOINT);
+    url.searchParams.set("book_id", '+' + book.id);
 
     const response = await fetch(url);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -589,3 +607,6 @@ const blurParagraph = async (e) => {
         ru: p.innerText
     });
 };
+
+
+

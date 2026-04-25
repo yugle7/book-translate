@@ -85,8 +85,11 @@ def handler(event, context):
         chapter_id = params.get("chapter_id")
 
         if isinstance(book_id, str):
-            if book_id.startswith('-'):
-                res = db.delete_book(book_id.removeprefix('-'))
+            k = book_id[0]
+            if k == '-':
+                res = db.delete_book(book_id[1:])
+            elif k == '+':
+                res = db.save_book(book_id[1:])
             else:
                 res = db.load_book(book_id)
 
@@ -117,7 +120,7 @@ if __name__ == '__main__':
         # 'queryStringParameters': {'b': -4},
         # 'queryStringParameters': {'b': 27, 'i': 82},
         # 'queryStringParameters': {},
-        # 'queryStringParameters': {'book_id': 489898406972149379},
+        'queryStringParameters': {'book_id': '+1777054308952753879'},
         # 'queryStringParameters': {'chapter_id': 2202934346076896777},
         # 'queryStringParameters': {'chapter_id': 2202934346076896777, "i": "0", "ru": "s"},
     }, None))

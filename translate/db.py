@@ -1,11 +1,12 @@
 import json
 
-import ydb
 import ydb.iam
 
 import os
 
-from utils import translate, parse
+from storage import get_link
+from translate import get_translations
+from utils import parse
 
 from dotenv import load_dotenv
 
@@ -89,6 +90,19 @@ def delete_book(id):
     return {"deleted": True}
 
 
+def save_book(id):
+    res = execute(f"SELECT title FROM books WHERE id={id};")
+    if not res:
+        return {}
+    book = res[0]
+    paragraphs = execute(f"SELECT ru FROM paragraphs WHERE book_id={id} AND ru IS NOT NULL;")
+    if not paragraphs:
+        return {}
+    return {
+        'link': get_link(book, paragraphs)
+    }
+
+
 def create_book(text):
     print('create_book:', len(text))
     book, chapters, paragraphs = parse(text)
@@ -133,7 +147,7 @@ def get_translate(chapter_id, i, d=5):
     print('get_translate:', chapter_id, i)
 
     paragraphs = execute(f"SELECT id, i, en FROM paragraphs WHERE chapter_id={chapter_id} and i>={max(0, i - d)} and i<={i + d} and ru is null;")
-    if not paragraphs or not translate(paragraphs):
+    if not paragraphs or not get_translations(paragraphs):
         return {}
 
     schema = {

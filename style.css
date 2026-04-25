@@ -109,6 +109,25 @@ h1:empty::before {
     cursor: pointer;
 }
 
+article {
+    position: relative;
+}
+
+#translation {
+    position: absolute;
+    right: 0;
+    top: 0;
+    padding-right: 10px;
+    cursor: pointer;
+    text-align: center;
+    color: var(--accent);
+}
+
+#translation:hover {
+    color: var(--accent-hover);
+
+}
+
 #at-main:hover,
 #at-book:hover {
     transform: scale(1.1);
