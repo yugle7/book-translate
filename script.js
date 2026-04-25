@@ -401,47 +401,47 @@ getBooks()
 
 // заглушки для сервера
 
-const _loadChapter = async () => {
-    console.log('loadChapter:', chapter.id);
-    chapter = {
-        id: chapter.id,
-        translates: [
-            {id: 101, ru: "", en: "some text"},
-            {id: 102, ru: "", en: "text"},
-            {id: 103, ru: "", en: "any text"},
-            {id: 104, ru: "уже переведено", en: "it's text"},
-            {id: 105, ru: "", en: "text again"},
-        ]
-    }
-}
-
-const _createBook = async (text) => {
-    console.log('createBook:', text.slice(0, 16));
-    book = {
-        id: 3,
-        title: "new book"
-    }
-}
-
-const _getTranslates = async () => {
-    return {"101": "перевод", "102": "еще перевод"}
-}
-
-const _getBooks = async () => {
-    console.log('getBooks:')
-    return [{id: 1, title: 'first book'}, {id: 2, title: 'second book'}]
-};
-
-const _loadBook = async () => {
-    console.log('loadBook()', book.id);
-
-    book.title = 'title';
-    book.chapters = [{id: 11, title: 'one'}, {id: 12, title: 'two'}, {id: 13, title: 'three'}]
-
-    book.model = 'gpt4';
-    book.rules = 'правила';
-    book.words = {'word': 'слово', 'excel': 'excel'}
-}
+// const _loadChapter = async () => {
+//     console.log('loadChapter:', chapter.id);
+//     chapter = {
+//         id: chapter.id,
+//         translates: [
+//             {id: 101, ru: "", en: "some text"},
+//             {id: 102, ru: "", en: "text"},
+//             {id: 103, ru: "", en: "any text"},
+//             {id: 104, ru: "уже переведено", en: "it's text"},
+//             {id: 105, ru: "", en: "text again"},
+//         ]
+//     }
+// }
+//
+// const _createBook = async (text) => {
+//     console.log('createBook:', text.slice(0, 16));
+//     book = {
+//         id: 3,
+//         title: "new book"
+//     }
+// }
+//
+// const _getTranslates = async () => {
+//     return {"101": "перевод", "102": "еще перевод"}
+// }
+//
+// const _getBooks = async () => {
+//     console.log('getBooks:')
+//     return [{id: 1, title: 'first book'}, {id: 2, title: 'second book'}]
+// };
+//
+// const _loadBook = async () => {
+//     console.log('loadBook()', book.id);
+//
+//     book.title = 'title';
+//     book.chapters = [{id: 11, title: 'one'}, {id: 12, title: 'two'}, {id: 13, title: 'three'}]
+//
+//     book.model = 'gpt4';
+//     book.rules = 'правила';
+//     book.words = {'word': 'слово', 'excel': 'excel'}
+// }
 
 // прокрутка
 
@@ -565,19 +565,24 @@ model.addEventListener('blur', async () => {
     });
 });
 
-const inputParagraph = (e) => {
-    const p = e.currentTarget;
-
-    inputAutoSave({
-        chapter_id: chapter.id,
-        i: p.id,
-        ru: p.innerText
-    });
-};
+// const inputParagraph = (e) => {
+//     const p = e.currentTarget;
+//
+//     inputAutoSave({
+//         chapter_id: chapter.id,
+//         i: p.id,
+//         ru: p.innerText
+//     });
+// };
 
 const blurParagraph = async (e) => {
     const p = e.currentTarget;
 
+    if (p.innerText.startsWith('#')) {
+        p.classList.add('header');
+    } else {
+        p.classList.remove('header');
+    }
     await blurAutoSave({
         chapter_id: chapter.id,
         i: p.id,

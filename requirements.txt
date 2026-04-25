@@ -3,3 +3,5 @@ dotenv
 cityhash
 requests
 python-dotenv
+boto3
+botocore
