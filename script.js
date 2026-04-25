@@ -18,6 +18,7 @@ const settings = document.querySelector("form");
 
 const rules = document.getElementById("rules");
 const words = document.getElementById("words");
+const model = document.getElementById("model");
 
 let page = mainPage;
 const gutter = document.getElementById("gutter");
@@ -556,6 +557,13 @@ rules.addEventListener('blur', async () => {
         await blurAutoSave({
             book_id: book.id,
             rules: rules.value
+        });
+});
+
+model.addEventListener('blur', async () => {
+        await blurAutoSave({
+            book_id: book.id,
+            model: model.value
         });
 });
 
