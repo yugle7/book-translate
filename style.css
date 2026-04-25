@@ -16,7 +16,7 @@
     border: none;
     line-height: 1.5;
     font-weight: 400;
-    font-size: 20px;
+    font-size: 18px;
     font-family: monospace,
     system-ui,
     -apple-system,
@@ -73,7 +73,7 @@ a:hover {
 
 .title {
     padding: 20px;
-    font-size: 32px;
+    font-size: 28px;
     color: var(--accent);
 }
 
@@ -114,6 +114,7 @@ h1:empty::before {
 
 .header {
     color: var(--text-white);
+    font-size: 20px;
 }
 
 #chapter-page p {
@@ -189,7 +190,7 @@ textarea {
 .round-btn {
     position: fixed;
     font-family: system-ui;
-    font-size: 32px;
+    font-size: 28px;
     width: 56px;
     height: 56px;
     border-radius: 50%;

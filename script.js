@@ -79,8 +79,8 @@ const addParagraph = (text, i) => {
     if (text) {
         if (text[0] === '#') p.classList.add("header");
         if (i != null) {
-            p.oninput = inputRu;
-            p.onblur = blurRu
+            // p.oninput = inputParagraph;
+            p.onblur = blurParagraph
         }
     }
 
@@ -184,7 +184,7 @@ function makeEditable(element, clientX, clientY) {
     }
 
     element.classList.add("editable");
-    element.contentEditable = true;
+    element.contentEditable = "plaintext-only";
     element.focus();
 
     if (clientX != null) {
@@ -486,8 +486,7 @@ async function saveToServer(update) {
             return false;
         }
 
-        const data = await response.json();
-        console.log('saveToServer:', data);
+        await response.json();
         return true;
 
     } catch (error) {
@@ -515,7 +514,6 @@ const inputAutoSave = (update) => {
 }
 
 const blurAutoSave = async (update) => {
-    console.log('blurAutoSave:', update)
     if (saveTimeout) {
         clearTimeout(saveTimeout);
         saveTimeout = null;
@@ -523,16 +521,16 @@ const blurAutoSave = async (update) => {
     await saveToServer(update);
 }
 
-title.addEventListener('input', async () => {
-    if (book.title !== title.innerText.trim()) {
-        document.getElementById(book.id).innerText = book.title = title.innerText.trim();
-
-        inputAutoSave({
-            book_id: book.id,
-            title: book.title
-        });
-    }
-});
+// title.addEventListener('input', async () => {
+//     if (book.title !== title.innerText.trim()) {
+//         document.getElementById(book.id).innerText = book.title = title.innerText.trim();
+//
+//         inputAutoSave({
+//             book_id: book.id,
+//             title: book.title
+//         });
+//     }
+// });
 
 title.addEventListener('blur', async () => {
     if (book.title !== title.innerText.trim()) {
@@ -547,27 +545,27 @@ title.addEventListener('blur', async () => {
 
 
 words.addEventListener('blur', async () => {
-        await blurAutoSave({
-            book_id: book.id,
-            words: words.value
-        });
+    await blurAutoSave({
+        book_id: book.id,
+        words: words.value
+    });
 });
 
 rules.addEventListener('blur', async () => {
-        await blurAutoSave({
-            book_id: book.id,
-            rules: rules.value
-        });
+    await blurAutoSave({
+        book_id: book.id,
+        rules: rules.value
+    });
 });
 
 model.addEventListener('blur', async () => {
-        await blurAutoSave({
-            book_id: book.id,
-            model: model.value
-        });
+    await blurAutoSave({
+        book_id: book.id,
+        model: model.value
+    });
 });
 
-const inputRu = (e) => {
+const inputParagraph = (e) => {
     const p = e.currentTarget;
 
     inputAutoSave({
@@ -577,7 +575,7 @@ const inputRu = (e) => {
     });
 };
 
-const blurRu = async (e) => {
+const blurParagraph = async (e) => {
     const p = e.currentTarget;
 
     await blurAutoSave({

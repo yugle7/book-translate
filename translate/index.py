@@ -102,7 +102,7 @@ def handler(event, context):
     else:
         print("method:", method)
 
-    print(res)
+    # print(res)
     return {
         "statusCode": 200,
         "headers": {"content-type": "application/json"},
