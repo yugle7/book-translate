@@ -148,6 +148,7 @@ def get_translate(chapter_id, i, d=5):
 
 
 def update_book(data):
+    print('update_book:', data)
     book_id = data['book_id']
 
     if 'title' in data:
@@ -168,8 +169,8 @@ def update_book(data):
     if 'words' in data:
         words = {}
         for q in data['words'].split('\n'):
-            if q.count(' - ') == 1:
-                en, ru = q.split(' - ')
+            if q.count(' = ') == 1:
+                en, ru = q.split(' = ')
                 words[en] = ru
         return execute(f"UPDATE books SET words='{json.dumps(words)}' WHERE id={book_id}")
 
@@ -177,6 +178,7 @@ def update_book(data):
 
 
 def update_paragraph(data):
+    print('update_paragraph:', data)
     chapter_id = data['chapter_id']
     i = data['i']
 

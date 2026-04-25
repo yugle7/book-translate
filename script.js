@@ -156,7 +156,7 @@ const toBookPage = async (e = null) => {
     settings.rules.style.height = settings.rules.scrollHeight + "px";
 
     if (book.words) {
-        settings.words.value = Object.entries(book.words).map(([en, ru]) => `${en} - ${ru}`).join('\n');
+        settings.words.value = Object.entries(JSON.parse(book.words)).map(([en, ru]) => `${en} = ${ru}`).join('\n');
     }
     settings.words.style.height = settings.words.scrollHeight + "px";
 }
@@ -512,6 +512,7 @@ const inputAutoSave = (update) => {
 }
 
 const blurAutoSave = async (update) => {
+    console.log('blurAutoSave:', update)
     if (saveTimeout) {
         clearTimeout(saveTimeout);
         saveTimeout = null;
@@ -539,6 +540,21 @@ title.addEventListener('blur', async () => {
             title: book.title
         });
     }
+});
+
+
+words.addEventListener('blur', async () => {
+        await blurAutoSave({
+            book_id: book.id,
+            words: words.value
+        });
+});
+
+rules.addEventListener('blur', async () => {
+        await blurAutoSave({
+            book_id: book.id,
+            rules: rules.value
+        });
 });
 
 const inputRu = (e) => {
