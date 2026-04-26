@@ -8,6 +8,8 @@
     --text-white: #fff;
     --accent: #3fa883;
     --accent-hover: #318b5b;
+    --action: #6f77d6;
+    --action-hover: #5d68dc;
 }
 
 * {
@@ -138,7 +140,7 @@ article {
     cursor: pointer;
     text-align: center;
     fill: none;
-    stroke: var(--text-primary);
+    stroke: var(--action);
     stroke-width: 2;
     stroke-linecap: round;
     stroke-linejoin: round;
@@ -146,7 +148,7 @@ article {
 
 #erase:hover,
 #download:hover {
-    stroke: var(--text-white);
+    stroke: var(--action-hover);
 }
 
 #at-main:hover,
