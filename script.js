@@ -165,7 +165,7 @@ const toBookPage = async (e = null) => {
         })
     );
     settings.model.value = book.model;
-    
+
     settings.rules.style.height = "auto";
     settings.rules.value = book.rules || "";
     settings.rules.style.height = settings.rules.scrollHeight + "px";
