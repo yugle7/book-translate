@@ -15,14 +15,18 @@ const title = document.getElementById("title");
 const books = document.getElementById("books");
 const chapters = document.getElementById("chapters");
 const settings = document.querySelector("form");
-const translation = document.getElementById("translation");
+
+const erase = document.getElementById("erase");
+const download = document.getElementById("download");
 
 const rules = document.getElementById("rules");
 const words = document.getElementById("words");
 const model = document.getElementById("model");
 
 let page = mainPage;
-const gutter = document.getElementById("gutter");
+
+const bookGutter = document.getElementById("book-gutter");
+const chapterGutter = document.getElementById("chapter-gutter");
 
 // состояние
 
@@ -33,7 +37,7 @@ let paragraph = null;
 // прогресс
 
 let isTranslating = false;
-let activeGutter = null;
+let gutter = null;
 let isDragging = false;
 let wasDragging = false;
 let startX = 0;
@@ -65,13 +69,19 @@ const addTranslates = async () => {
 }
 
 const addBook = ({id, title}) => {
-    const book = document.createElement('li')
+    const b = document.createElement('li')
     if (title) {
-        book.innerText = title;
+        b.innerText = title;
     }
-    book.id = id;
-    book.onclick = toBookPage;
-    books.appendChild(book);
+    b.id = id;
+    b.onclick = toBookPage;
+    books.appendChild(b);
+}
+
+const removeBook = () => {
+    const b = document.getElementById(book.id)
+    b.remove()
+    book = null;
 }
 
 const addParagraph = (text, i) => {
@@ -101,7 +111,8 @@ const addGutter = () => {
     chapterPage.appendChild(gutter);
 }
 
-gutter.onmousedown = handleMouseDown;
+bookGutter.onmousedown = handleMouseDown;
+chapterGutter.onmousedown = handleMouseDown;
 
 // переключение между страницами
 
@@ -124,7 +135,7 @@ const toChapterPage = async (e = null) => {
     await loadChapter();
     chapter.paragraphs.forEach(p => {
         addParagraph(p.ru, p.i)
-        addGutter();
+        // addGutter();
         addParagraph(p.en)
     });
 }
@@ -136,13 +147,13 @@ const toBookPage = async (e = null) => {
         e.preventDefault()
         book = {id: e.currentTarget.id};
     }
-
     mainPage.classList.add("hidden");
     bookPage.classList.remove("hidden");
     chapterPage.classList.add("hidden");
 
     await loadBook();
     title.innerText = book.title || '';
+    choseAction();
 
     chapters.replaceChildren(
         ...book.chapters.map((c, i) => {
@@ -246,10 +257,10 @@ const handleParagraphClick = async (e) => {
 }
 
 function handleMouseDown(e) {
-    activeGutter = e.target;
+    gutter = e.target;
     isDragging = true;
     wasDragging = false;
-    activeGutter.classList.add("dragging");
+    gutter.classList.add("dragging");
     document.body.style.cursor = "col-resize";
     startX = e.clientX;
     startLeftWith = page.firstElementChild.getBoundingClientRect().width;
@@ -268,15 +279,16 @@ function handleMouseMove(e) {
     let leftWidth = startLeftWith + e.clientX - startX;
     leftWidth = Math.min(maxWidth, Math.max(minWidth, leftWidth));
 
-    page.style.gridTemplateColumns = `${leftWidth}px 5px 1fr`;
+    gutter.style.left = leftWidth + 'px';
+    page.style.gridTemplateColumns = `${leftWidth}px 1fr`;
 }
 
 function handleMouseUp() {
-    if (isDragging && activeGutter) {
+    if (isDragging && gutter) {
         isDragging = false;
-        activeGutter.classList.remove("dragging");
+        gutter.classList.remove("dragging");
         document.body.style.cursor = "";
-        activeGutter = null;
+        gutter = null;
     }
 }
 
@@ -306,17 +318,23 @@ document.onmousemove = handleMouseMove;
 document.onmouseup = handleMouseUp;
 document.onmouseleave = handleMouseUp;
 
-translation.onclick = async () => {
+erase.onclick = async () => {
+    await deleteBook();
+    toMainPage();
+}
+download.onclick = async () => {
     const res = await getTranslation()
     if (res) window.open(res['link'], '_blank');
 }
 
-atMain.onclick = toMain.onclick = () => {
+const toMainPage = () => {
     console.log('toMainPage');
 
     mainPage.classList.remove("hidden");
     bookPage.classList.add("hidden");
-};
+}
+
+atMain.onclick = toMain.onclick = toMainPage;
 
 atBook.onclick = toBook.onclick = () => {
     page = bookPage;
@@ -326,7 +344,7 @@ atBook.onclick = toBook.onclick = () => {
     chapterPage.classList.add("hidden");
 };
 
-chapterPage.querySelector('div').onmousedown = handleMouseDown;
+// chapterPage.querySelector('div').onmousedown = handleMouseDown;
 
 rules.addEventListener("input", resize);
 words.addEventListener("input", resize);
@@ -360,6 +378,15 @@ const getBooks = async () => {
     const response = await fetch(API_ENDPOINT);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return await response.json();
+};
+
+const deleteBook = async () => {
+    console.log('deleteBook')
+    const url = new URL(API_ENDPOINT);
+    url.searchParams.set("book_id", '-' + book.id)
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    removeBook();
 };
 
 const createBook = async (text) => {
@@ -539,6 +566,17 @@ const blurAutoSave = async (update) => {
     await saveToServer(update);
 }
 
+const choseAction = () => {
+    if (title.innerText.trim()) {
+        download.style.display = 'inline';
+        erase.style.display = 'none';
+    } else {
+        download.style.display = 'none';
+        erase.style.display = 'inline';
+    }
+}
+
+title.oninput = choseAction;
 // title.addEventListener('input', async () => {
 //     if (book.title !== title.innerText.trim()) {
 //         document.getElementById(book.id).innerText = book.title = title.innerText.trim();
@@ -549,6 +587,7 @@ const blurAutoSave = async (update) => {
 //         });
 //     }
 // });
+
 
 title.addEventListener('blur', async () => {
     if (book.title !== title.innerText.trim()) {

@@ -19,10 +19,19 @@
             <button id="at-main">←</button>
             <h1 id="title" contenteditable="plaintext-only"></h1>
         </section>
-        <button id="translation">.md</button>
+        <button id="download">
+            <svg width="24px" height="24px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 15C3 17.8284 3 19.2426 3.87868 20.1213C4.75736 21 6.17157 21 9 21H15C17.8284 21 19.2426 21 20.1213 20.1213C21 19.2426 21 17.8284 21 15"/>
+                <path d="M12 3V16M12 16L16 11.625M12 16L8 11.625"/>
+            </svg>
+        </button>
+        <button id="erase">
+            <svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 6L18 18M18 6L6 18"/>
+            </svg>
+        </button>
         <ol id="chapters"></ol>
     </article>
-    <div id="gutter"></div>
     <form>
         <label>
             <select id="model" name="model">
@@ -38,6 +47,7 @@
             <textarea id="words" name="words" placeholder="fabric = фабрик&#10details = дитейлз" rows="3"></textarea>
         </label>
     </form>
+    <div id="book-gutter"></div>
     <button id="to-main" class="round-btn hided" title="Вернуться к загрузке">
         ←
     </button>
@@ -48,8 +58,8 @@
         <button id="at-book">←</button>
         Перевод
     </span>
-    <div></div>
     <span class="title">Original</span>
+    <div id="chapter-gutter"></div>
     <button id="to-book" class="round-btn hided" title="Вернуться к оглавлению">
         ←
     </button>

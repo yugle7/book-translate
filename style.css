@@ -70,8 +70,21 @@ a:hover {
 #chapter-page {
     display: grid;
     grid-template-rows: auto;
-    grid-template-columns: 1fr 5px 1fr;
-    min-height: 100vh;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 5px
+}
+
+#book-gutter,
+#chapter-gutter {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 5px;
+    background-color: var(--bg-secondary);
+    z-index: 9999;
+    cursor: col-resize;
+    user-select: none;
 }
 
 
@@ -113,19 +126,25 @@ article {
     position: relative;
 }
 
-#translation {
+#erase,
+#download {
+    display: none;
     position: absolute;
     right: 0;
     top: 0;
-    padding-right: 10px;
+    padding: 4px;
     cursor: pointer;
     text-align: center;
-    color: var(--accent);
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
-#translation:hover {
-    color: var(--accent-hover);
-
+#erase:hover,
+#download:hover {
+    stroke: var(--accent-hover);
 }
 
 #at-main:hover,
@@ -246,6 +265,7 @@ textarea {
 .round-btn:active {
     transform: scale(0.95);
 }
+
 
 p:nth-child(1 of .left:empty)::before {
     content: "Нажать чтобы перевести";
