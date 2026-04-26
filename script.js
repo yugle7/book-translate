@@ -165,14 +165,13 @@ const toBookPage = async (e = null) => {
         })
     );
     settings.model.value = book.model;
-    settings.rules.value = book.rules || '';
+    
+    settings.rules.style.height = "auto";
+    settings.rules.value = book.rules || "";
     settings.rules.style.height = settings.rules.scrollHeight + "px";
 
-    if (book.words) {
-        settings.words.value = Object.entries(JSON.parse(book.words)).map(([en, ru]) => `${en} = ${ru}`).join('\n');
-    } else {
-        settings.words.value = "";
-    }
+    settings.words.value = Object.entries(JSON.parse(book.words)).map(([en, ru]) => `${en} = ${ru}`).join('\n');
+    settings.words.style.height = "auto";
     settings.words.style.height = settings.words.scrollHeight + "px";
 }
 
