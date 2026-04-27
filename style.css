@@ -31,7 +31,6 @@
     "Open Sans Mono",
     "Helvetica Neue",
     sans-serif;
-    background-color: var(--bg-primary);
     color: var(--text-primary);
 }
 
@@ -39,6 +38,12 @@
 *::before,
 *::after {
     box-sizing: border-box;
+}
+
+select,
+textarea,
+body {
+    background-color: var(--bg-primary);
 }
 
 #main {
@@ -92,25 +97,15 @@ a:hover {
 
 
 .title {
-    display: flex;
-    gap: 1rem;
     padding: 20px;
     font-size: 28px;
     color: var(--accent);
-}
-
-section {
-    display: flex;
-    flex-direction: row;
-    gap: 20px;
-    wrap-after: flex;
+    text-align: center;
 }
 
 h1 {
     outline: none;
     border: none;
-    color: var(--accent);
-    font-size: inherit;
 }
 
 h1:empty::before {
@@ -141,48 +136,54 @@ svg {
     stroke-linejoin: round;
 }
 
-.do {
-    display: none;
-    position: absolute;
-    background: transparent;
-    right: 0;
+nav {
+    position: sticky;
     top: 0;
+    display: flex;
+    justify-content: space-between;
+    background: transparent;
+}
+
+
+.top-left {
+    position: fixed;
+    left: 0;
+    top: 0;
+}
+
+.up-right {
+    position: absolute;
+    top: -8px;
+    right: 0;
 }
 
 #to-left,
 #to-right {
-    margin-top: -8px;
     display: none;
 }
 
-
-.do {
+.icon {
+    background: transparent;
     width: 40px;
     height: 40px;
     padding: 8px;
     cursor: pointer;
     text-align: center;
     stroke: var(--action);
+    z-index: 1000;
 }
 
-.do:hover {
+.icon:hover {
+    transform: scale(1.1);
     stroke: var(--action-hover);
 }
 
-.to,
-.at {
-    stroke: var(--text-primary);
+#erase {
+    display: none;
 }
 
-.to:hover,
-.at:hover {
-    transform: scale(1.1);
-    stroke: var(--text-white);
-}
-
-.to {
-    top: 20px;
-    left: 20px;
+#title {
+    margin-top: -32px;
 }
 
 .header {
@@ -215,13 +216,6 @@ textarea {
     overflow: hidden;
 }
 
-.left {
-    background: var(--bg-primary);
-}
-
-.right {
-    background: var(--bg-primary);
-}
 
 div {
     position: relative;
@@ -232,7 +226,7 @@ div {
     background: var(--bg-editable);
 }
 
-#upload {
+.button {
     padding: 16px 32px;
     font-size: 1.1rem;
     background: var(--accent);
@@ -243,28 +237,9 @@ div {
     transition: all 0.3s;
 }
 
-#upload:hover {
+.button:hover {
     background: var(--accent-hover);
     transform: scale(1.01);
-}
-
-.round {
-    position: fixed;
-    font-size: 28px;
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background: var(--accent);
-    color: var(--text-white);
-    border: none;
-    cursor: pointer;
-    display: flex;
-    text-align: center;
-    align-items: center;
-    justify-content: center;
-    opacity: 0.8;
-    transition: all 0.5s;
-    z-index: 1000;
 }
 
 
@@ -277,10 +252,8 @@ div {
     transform: scale(0.95);
 }
 
-
-p:nth-child(1 of .left:empty)::before {
-    content: "Нажать чтобы перевести";
-    opacity: 0.3;
+p {
+    height: 100%;
 }
 
 p:empty:hover {
@@ -346,11 +319,11 @@ li::before {
         display: inherit;
     }
 
-    .invisible,
     .right,
     #book-gutter,
     #chapter-gutter {
         display: none;
     }
 }
+
 

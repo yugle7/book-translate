@@ -8,8 +8,6 @@ const chapterPage = document.getElementById("chapter");
 
 const toMainButton = document.getElementById("to-main");
 const toBookButton = document.getElementById("to-book");
-const toMainRoundButton = document.getElementById("to-main-round");
-const toBookRoundButton = document.getElementById("to-book-round");
 
 const title = document.getElementById("title");
 const books = document.getElementById("books");
@@ -106,8 +104,9 @@ const addParagraph = (text, i) => {
     } else {
         p.id = i;
         div.classList.add('left');
-        div.onclick = handleParagraphClick;
+        div.addEventListener('click', handleParagraphClick);
     }
+    div.addEventListener('click', handleClick);
     chapterPage.appendChild(div);
 }
 
@@ -237,26 +236,31 @@ function handleKeydown(e) {
 
 // обработчики событий
 
-const toLeftParagraph = (e) => {
+const toLeft = (e) => {
     const right = e.currentTarget.parentElement;
-    console.log(right)
     const left = right.previousElementSibling;
-    right.style.display = 'none';
-    left.style.display = 'inherit';
+    right.classList.add('right');
+    left.classList.remove('right');
     left.appendChild(toRightButton);
 }
 
-const toRightParagraph = (e) => {
+const toRight = (e) => {
     const left = e.currentTarget.parentElement;
-    console.log(left)
     const right = left.nextElementSibling;
-    left.style.display = 'none';
-    right.style.display = 'inherit';
-    const back = toLeftButton.cloneNode(true);
-    back.onclick = toLeftParagraph;
-    right.appendChild(back);
+    left.classList.add('right');
+    right.classList.remove('right');
+    right.appendChild(toLeftButton);
 }
 
+const handleClick = (e) => {
+    if (toRightButton.style.display === 'none') return;
+    if (e.currentTarget.classList.contains('left')) {
+        e.currentTarget.appendChild(toRightButton);
+    } else {
+        e.currentTarget.appendChild(toLeftButton);
+    }
+
+}
 
 const handleParagraphClick = async (e) => {
     if (isDragging) return;
@@ -268,7 +272,6 @@ const handleParagraphClick = async (e) => {
     if (p.classList.contains("editable")) return;
 
     console.log('handleParagraphClick:', p.id)
-    div.appendChild(toRightButton);
 
     if (paragraph) {
         paragraph.classList.remove("editable");
@@ -343,8 +346,8 @@ document.onmousemove = handleMouseMove;
 document.onmouseup = handleMouseUp;
 document.onmouseleave = handleMouseUp;
 
-toRightButton.onclick = toRightParagraph;
-toLeftButton.onclick = toLeftParagraph;
+toRightButton.onclick = toRight;
+toLeftButton.onclick = toLeft;
 
 erase.onclick = async () => {
     await deleteBook();
@@ -362,9 +365,9 @@ const toMainPage = () => {
     bookPage.classList.add("hidden");
 }
 
-toMainRoundButton.onclick = toMainButton.onclick = toMainPage;
+toMainButton.onclick = toMainPage;
 
-toBookRoundButton.onclick = toBookButton.onclick = () => {
+toBookButton.onclick = () => {
     page = bookPage;
     console.log('backToBook');
 
@@ -479,11 +482,11 @@ getBooks()
 //     chapter = {
 //         id: chapter.id,
 //         translates: [
-//             {id: 101, ru: "", en: "some text"},
-//             {id: 102, ru: "", en: "text"},
-//             {id: 103, ru: "", en: "any text"},
-//             {id: 104, ru: "уже переведено", en: "it's text"},
-//             {id: 105, ru: "", en: "text again"},
+//             {id: 101, left: "", right: "some text"},
+//             {id: 102, left: "", right: "text"},
+//             {id: 103, left: "", right: "any text"},
+//             {id: 104, left: "уже переведено", right: "it's text"},
+//             {id: 105, left: "", right: "text again"},
 //         ]
 //     }
 // }
@@ -515,22 +518,6 @@ getBooks()
 //     book.rules = 'правила';
 //     book.words = {'word': 'слово', 'excel': 'excel'}
 // }
-
-// прокрутка
-
-function checkScroll() {
-    const scrollY = window.scrollY || document.documentElement.scrollTop;
-
-    if (scrollY > 50) {
-        toMainButton.classList.remove('hided');
-        toBookButton.classList.remove('hided');
-    } else {
-        toMainButton.classList.add('hided');
-        toBookButton.classList.add('hided');
-    }
-}
-
-window.addEventListener('scroll', checkScroll);
 
 // автосохранение
 
@@ -656,7 +643,7 @@ model.addEventListener('blur', async () => {
 //     inputAutoSave({
 //         chapter_id: chapter.id,
 //         i: p.id,
-//         ru: p.innerText
+//         left: p.innerText
 //     });
 // };
 
@@ -668,10 +655,11 @@ const blurParagraph = async (e) => {
     } else {
         p.classList.remove('header');
     }
+    p.classList.remove('editable');
     await blurAutoSave({
         chapter_id: chapter.id,
         i: p.id,
-        ru: p.innerText
+        left: p.innerText
     });
 };
 
