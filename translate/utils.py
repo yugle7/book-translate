@@ -1,7 +1,4 @@
-import os
 import re
-
-import requests
 
 import dotenv
 
@@ -35,25 +32,25 @@ def parse(text):
 
     book = {"id": book_id}
 
-    for i, en in enumerate(texts):
-        if en.startswith('# '):
+    for i, right in enumerate(texts):
+        if right.startswith('# '):
             chapter_id = get_id()
             chapters.append({
                 "id": chapter_id,
                 "book_id": book_id,
-                "title": en.removeprefix('# ').strip()
+                "title": right.removeprefix('# ').strip()
             })
         elif not chapters:
             chapters.append({
                 "id": chapter_id,
                 "book_id": book_id,
-                "title": en.strip('#').strip()
+                "title": right.strip('#').strip()
             })
         paragraphs.append({
             "book_id": book_id,
             "chapter_id": chapter_id,
             "i": i,
-            "en": en
+            "right": right
         })
 
     return book, chapters, paragraphs

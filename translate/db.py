@@ -95,7 +95,7 @@ def save_book(id):
     if not res:
         return {}
     book = res[0]
-    paragraphs = execute(f"SELECT ru FROM paragraphs WHERE book_id={id} AND ru IS NOT NULL;")
+    paragraphs = execute(f"SELECT left FROM paragraphs WHERE book_id={id} AND left IS NOT NULL;")
     if not paragraphs:
         return {}
     return {
@@ -120,7 +120,7 @@ def create_book(text):
         'book_id': 'Uint64',
         'chapter_id': 'Uint64',
         'i': 'Uint32',
-        'en': 'Utf8'
+        'right': 'Utf8'
     }
     query = get_insert(schema, 'paragraphs')
     execute(query, {"$inserts": paragraphs})
@@ -140,25 +140,25 @@ def load_book(id):
 
 def load_chapter(id):
     print('load_chapter:', id)
-    return execute(f"SELECT i, ru, en FROM paragraphs WHERE chapter_id={id};")
+    return execute(f"SELECT i, left, right FROM paragraphs WHERE chapter_id={id};")
 
 
 def get_translate(chapter_id, i, d=5):
     print('get_translate:', chapter_id, i)
 
-    paragraphs = execute(f"SELECT id, i, en FROM paragraphs WHERE chapter_id={chapter_id} and i>={max(0, i - d)} and i<={i + d} and ru is null;")
+    paragraphs = execute(f"SELECT id, i, right FROM paragraphs WHERE chapter_id={chapter_id} and i>={max(0, i - d)} and i<={i + d} and left is null;")
     if not paragraphs or not get_translations(paragraphs):
         return {}
 
     schema = {
         "id": "Int64",
-        "ru": "Utf8"
+        "left": "Utf8"
     }
     query = get_update(schema, "paragraphs")
-    updates = [{'id': q['id'], 'ru': q['ru']} for q in paragraphs]
+    updates = [{'id': q['id'], 'left': q['left']} for q in paragraphs]
     execute(query, {'$updates': updates})
 
-    return {q['i']: q["ru"] for q in paragraphs}
+    return {q['i']: q["left"] for q in paragraphs}
 
 
 def update_book(data):
@@ -184,8 +184,8 @@ def update_book(data):
         words = {}
         for q in data['words'].split('\n'):
             if q.count(' = ') == 1:
-                en, ru = q.split(' = ')
-                words[en] = ru
+                right, left = q.split(' = ')
+                words[right] = left
         return execute(f"UPDATE books SET words='{json.dumps(words)}' WHERE id={book_id}")
 
     return {}
@@ -197,6 +197,6 @@ def update_paragraph(data):
     i = data['i']
 
     return execute(f'''
-        DECLARE $ru AS Utf8;
-        UPDATE paragraphs SET ru=$ru WHERE chapter_id={chapter_id} and i={i};
-    ''', {"$ru": data['ru']})
+        DECLARE $left AS Utf8;
+        UPDATE paragraphs SET left=$left WHERE chapter_id={chapter_id} and i={i};
+    ''', {"$left": data['left']})

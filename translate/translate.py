@@ -1,5 +1,4 @@
 import os
-import re
 
 import requests
 
@@ -23,7 +22,7 @@ payload = {
 
 
 def get_translations(paragraphs: list[dict]) -> bool:
-    payload['texts'] = [q['en'] for q in paragraphs]
+    payload['texts'] = [q['right'] for q in paragraphs]
     response = requests.post(url, headers=headers, json=payload)
 
     if not response.ok:
@@ -31,6 +30,6 @@ def get_translations(paragraphs: list[dict]) -> bool:
 
     result = response.json()
     for q, r in zip(paragraphs, result['translations']):
-        q['ru'] = r['text']
+        q['left'] = r['text']
 
     return True

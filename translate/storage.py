@@ -14,7 +14,7 @@ def get_key(book):
 
 
 def get_body(paragraphs):
-    return '\n\n'.join(q['ru'] for q in paragraphs if q['ru']).encode('utf-8')
+    return '\n\n'.join(q['left'] for q in paragraphs if q['left']).encode('utf-8')
 
 
 def get_link(book: dict, paragraphs: list[dict]) -> str:

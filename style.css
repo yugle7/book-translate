@@ -41,7 +41,7 @@
     box-sizing: border-box;
 }
 
-#main-page {
+#main {
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -68,13 +68,14 @@ a:hover {
     visibility: hidden !important;
 }
 
-#book-page,
-#chapter-page {
+#book,
+#chapter {
     display: grid;
     grid-template-rows: auto;
     grid-template-columns: 1fr 1fr;
     column-gap: 5px
 }
+
 
 #book-gutter,
 #chapter-gutter {
@@ -91,6 +92,8 @@ a:hover {
 
 
 .title {
+    display: flex;
+    gap: 1rem;
     padding: 20px;
     font-size: 28px;
     color: var(--accent);
@@ -116,54 +119,78 @@ h1:empty::before {
     color: var(--text-primary);
 }
 
-#at-main,
-#at-book {
-    font-family: system-ui;
-    font-size: inherit;
-    color: var(--text-primary);
+button {
+    display: flex;
     cursor: pointer;
+    align-items: center;
+}
+
+#upload {
+    display: block;
 }
 
 article {
     position: relative;
 }
 
-#erase,
-#download {
+svg {
+    background: transparent;
+    stroke-width: 2;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.do {
     display: none;
     position: absolute;
+    background: transparent;
     right: 0;
     top: 0;
+}
+
+#to-left,
+#to-right {
+    margin-top: -8px;
+    display: none;
+}
+
+
+.do {
     width: 40px;
     height: 40px;
     padding: 8px;
     cursor: pointer;
     text-align: center;
-    fill: none;
     stroke: var(--action);
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
 }
 
-#erase:hover,
-#download:hover {
+.do:hover {
     stroke: var(--action-hover);
 }
 
-#at-main:hover,
-#at-book:hover {
-    transform: scale(1.1);
-    color: var(--text-white);
+.to,
+.at {
+    stroke: var(--text-primary);
 }
 
+.to:hover,
+.at:hover {
+    transform: scale(1.1);
+    stroke: var(--text-white);
+}
+
+.to {
+    top: 20px;
+    left: 20px;
+}
 
 .header {
     color: var(--text-white);
     font-size: 20px;
 }
 
-#chapter-page p {
+#chapter p {
     user-select: text;
     padding: 20px;
     outline: none;
@@ -188,7 +215,6 @@ textarea {
     overflow: hidden;
 }
 
-
 .left {
     background: var(--bg-primary);
 }
@@ -197,27 +223,16 @@ textarea {
     background: var(--bg-primary);
 }
 
-
-#book-page div,
-#chapter-page div {
-    background: var(--bg-secondary);
-    cursor: col-resize;
-    transition: background 0.2s;
+div {
+    position: relative;
 }
 
-#chapter-page div:hover {
-    background: var(--bg-tertiary);
-}
 
-#chapter-page div.dragging {
-    background: var(--bg-tertiary);
-}
-
-#chapter-page p.editable {
+#chapter p.editable {
     background: var(--bg-editable);
 }
 
-.upload-btn {
+#upload {
     padding: 16px 32px;
     font-size: 1.1rem;
     background: var(--accent);
@@ -228,14 +243,13 @@ textarea {
     transition: all 0.3s;
 }
 
-.upload-btn:hover {
+#upload:hover {
     background: var(--accent-hover);
     transform: scale(1.01);
 }
 
-.round-btn {
+.round {
     position: fixed;
-    font-family: system-ui;
     font-size: 28px;
     width: 56px;
     height: 56px;
@@ -254,22 +268,14 @@ textarea {
 }
 
 
-#to-main,
-#to-book {
-    top: 20px;
-    left: 20px;
-}
-
-
-.round-btn:hover {
+.round:hover {
     background: var(--accent-hover);
     transform: scale(1.1);
 }
 
-.round-btn:active {
+.round:active {
     transform: scale(0.95);
 }
-
 
 
 p:nth-child(1 of .left:empty)::before {
@@ -325,5 +331,26 @@ li::before {
     width: 2.5rem;
     padding-right: 0.5rem;
     margin-left: -0.5rem;
+}
+
+
+@media (max-width: 500px) {
+    #book,
+    #chapter {
+        display: flex;
+        flex-direction: column;
+    }
+
+    #to-left,
+    #to-right {
+        display: inherit;
+    }
+
+    .invisible,
+    .right,
+    #book-gutter,
+    #chapter-gutter {
+        display: none;
+    }
 }
 

@@ -1,20 +1,20 @@
 const API_ENDPOINT = "https://d5ds1trsppqs2rog97qd.cmxivbes.apigw.yandexcloud.net";
 
-const mainPage = document.getElementById("main-page");
-const bookPage = document.getElementById("book-page");
-const uploadBtn = document.getElementById("upload-btn");
-const fileInput = document.getElementById("file-input");
-const chapterPage = document.getElementById("chapter-page");
+const mainPage = document.getElementById("main");
+const bookPage = document.getElementById("book");
+const uploadButton = document.getElementById("upload");
+const fileInput = document.getElementById("file");
+const chapterPage = document.getElementById("chapter");
 
-const toMain = document.getElementById("to-main");
-const toBook = document.getElementById("to-book");
-const atMain = document.getElementById("at-main");
-const atBook = document.getElementById("at-book");
+const toMainButton = document.getElementById("to-main");
+const toBookButton = document.getElementById("to-book");
+const toMainRoundButton = document.getElementById("to-main-round");
+const toBookRoundButton = document.getElementById("to-book-round");
 
 const title = document.getElementById("title");
 const books = document.getElementById("books");
 const chapters = document.getElementById("chapters");
-const settings = document.querySelector("form");
+const settings = document.getElementById("settings");
 
 const erase = document.getElementById("erase");
 const download = document.getElementById("download");
@@ -23,12 +23,15 @@ const rules = document.getElementById("rules");
 const words = document.getElementById("words");
 const model = document.getElementById("model");
 
-let page = mainPage;
+let toLeftButton = document.getElementById("to-left");
+let toRightButton = document.getElementById("to-right");
 
 const bookGutter = document.getElementById("book-gutter");
 const chapterGutter = document.getElementById("chapter-gutter");
 
 // состояние
+
+let page = mainPage;
 
 let book = null;
 let chapter = null;
@@ -95,21 +98,19 @@ const addParagraph = (text, i) => {
         }
     }
 
+    const div = document.createElement('div')
+    div.appendChild(p);
+
     if (i == null) {
-        p.classList.add('right');
+        div.classList.add('right');
     } else {
         p.id = i;
-        p.classList.add('left');
-        p.onclick = handleParagraphClick;
+        div.classList.add('left');
+        div.onclick = handleParagraphClick;
     }
-    chapterPage.appendChild(p);
+    chapterPage.appendChild(div);
 }
 
-const addGutter = () => {
-    const gutter = document.createElement("div");
-    gutter.onmousedown = handleMouseDown;
-    chapterPage.appendChild(gutter);
-}
 
 bookGutter.onmousedown = handleMouseDown;
 chapterGutter.onmousedown = handleMouseDown;
@@ -134,9 +135,8 @@ const toChapterPage = async (e = null) => {
 
     await loadChapter();
     chapter.paragraphs.forEach(p => {
-        addParagraph(p.ru, p.i)
-        // addGutter();
-        addParagraph(p.en)
+        addParagraph(p.left, p.i)
+        addParagraph(p.right)
     });
 }
 
@@ -155,22 +155,23 @@ const toBookPage = async (e = null) => {
     title.innerText = book.title || '';
     choseAction();
 
-    chapters.replaceChildren(
-        ...book.chapters.map((c, i) => {
-            const a = document.createElement('li');
-            a.id = c.id;
-            a.innerText = c.title;
-            a.onclick = toChapterPage;
-            return a;
-        })
-    );
+    if ("chapters" in book)
+        chapters.replaceChildren(
+            ...book.chapters.map((c, i) => {
+                const a = document.createElement('li');
+                a.id = c.id;
+                a.innerText = c.title;
+                a.onclick = toChapterPage;
+                return a;
+            })
+        );
     settings.model.value = book.model;
 
     settings.rules.style.height = "auto";
     settings.rules.value = book.rules || "";
     settings.rules.style.height = settings.rules.scrollHeight + "px";
 
-    settings.words.value = Object.entries(JSON.parse(book.words)).map(([en, ru]) => `${en} = ${ru}`).join('\n');
+    settings.words.value = book.words && Object.entries(JSON.parse(book.words)).map(([en, ru]) => `${en} = ${ru}`).join('\n');
     settings.words.style.height = "auto";
     settings.words.style.height = settings.words.scrollHeight + "px";
 }
@@ -236,14 +237,39 @@ function handleKeydown(e) {
 
 // обработчики событий
 
+const toLeftParagraph = (e) => {
+    const right = e.currentTarget.parentElement;
+    console.log(right)
+    const left = right.previousElementSibling;
+    right.style.display = 'none';
+    left.style.display = 'inherit';
+    left.appendChild(toRightButton);
+}
+
+const toRightParagraph = (e) => {
+    const left = e.currentTarget.parentElement;
+    console.log(left)
+    const right = left.nextElementSibling;
+    left.style.display = 'none';
+    right.style.display = 'inherit';
+    const back = toLeftButton.cloneNode(true);
+    back.onclick = toLeftParagraph;
+    right.appendChild(back);
+}
+
+
 const handleParagraphClick = async (e) => {
     if (isDragging) return;
     e.preventDefault();
 
-    const p = e.currentTarget;
-    console.log('handleParagraphClick:', p.id)
+    const div = e.currentTarget;
 
+    const p = div.firstElementChild;
     if (p.classList.contains("editable")) return;
+
+    console.log('handleParagraphClick:', p.id)
+    div.appendChild(toRightButton);
+
     if (paragraph) {
         paragraph.classList.remove("editable");
         paragraph.contentEditable = false;
@@ -310,12 +336,15 @@ function resize() {
     }
 }
 
-uploadBtn.onclick = () => fileInput.click();
+uploadButton.onclick = () => fileInput.click();
 fileInput.onchange = handleChange;
 
 document.onmousemove = handleMouseMove;
 document.onmouseup = handleMouseUp;
 document.onmouseleave = handleMouseUp;
+
+toRightButton.onclick = toRightParagraph;
+toLeftButton.onclick = toLeftParagraph;
 
 erase.onclick = async () => {
     await deleteBook();
@@ -333,9 +362,9 @@ const toMainPage = () => {
     bookPage.classList.add("hidden");
 }
 
-atMain.onclick = toMain.onclick = toMainPage;
+toMainRoundButton.onclick = toMainButton.onclick = toMainPage;
 
-atBook.onclick = toBook.onclick = () => {
+toBookRoundButton.onclick = toBookButton.onclick = () => {
     page = bookPage;
     console.log('backToBook');
 
@@ -493,11 +522,11 @@ function checkScroll() {
     const scrollY = window.scrollY || document.documentElement.scrollTop;
 
     if (scrollY > 50) {
-        toMain.classList.remove('hided');
-        toBook.classList.remove('hided');
+        toMainButton.classList.remove('hided');
+        toBookButton.classList.remove('hided');
     } else {
-        toMain.classList.add('hided');
-        toBook.classList.add('hided');
+        toMainButton.classList.add('hided');
+        toBookButton.classList.add('hided');
     }
 }
 

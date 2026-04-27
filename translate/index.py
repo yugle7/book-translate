@@ -122,5 +122,5 @@ if __name__ == '__main__':
         # 'queryStringParameters': {},
         'queryStringParameters': {'book_id': '+1777054308952753879'},
         # 'queryStringParameters': {'chapter_id': 2202934346076896777},
-        # 'queryStringParameters': {'chapter_id': 2202934346076896777, "i": "0", "ru": "s"},
+        # 'queryStringParameters': {'chapter_id': 2202934346076896777, "i": "0", "left": "s"},
     }, None))
